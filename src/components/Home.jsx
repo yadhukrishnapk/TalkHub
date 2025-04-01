@@ -13,6 +13,7 @@ import { PlusIcon, LogOutIcon, UserIcon, MailIcon, ShieldCheckIcon } from "lucid
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { motion } from "framer-motion";
 import UserInfoPanel from "./UserInfoPanel/UserInfoPanel";
+import ContactsHeader from "./ContactsHeader/ContactsHeader";
 
 function Home() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -33,16 +34,11 @@ function Home() {
         <ResizablePanelGroup direction="horizontal" className="h-full">
           {/* Contacts Sidebar */}
           <ResizablePanel defaultSize={25} minSize={20} className="flex flex-col bg-[#121212]">
-            <div className="p-4 flex items-center justify-between border-b border-gray-800">
-              <h2 className="text-xl font-bold text-white">Contacts</h2>
-              <Button
-                size="icon"
-                className="rounded-full bg-yellow-400 hover:bg-yellow-500 text-black shadow-md"
-                onClick={() => setIsModalOpen(true)}
-              >
-                <PlusIcon className="h-5 w-5" />
-              </Button>
-            </div>
+          <ContactsHeader
+  onAddContact={() => setIsModalOpen(true)}
+  onSearch={setSearchQuery}
+  userAvatar="/path/to/avatar.jpg" // Or pass a state variable
+/>
             <div className="flex-1 overflow-auto">
               <ChatList setActiveChat={handleSetActiveChat} searchFilter={searchQuery} />
             </div>
