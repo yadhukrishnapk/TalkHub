@@ -6,7 +6,7 @@ import { getStorage } from "firebase/storage";
 import { getDatabase } from "firebase/database";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyCuxKIPsYbtqENKTWDm43xfUGEmY9KW2eU",
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: "reactchat-4c648.firebaseapp.com",
   databaseURL: "https://reactchat-4c648-default-rtdb.firebaseio.com",
   projectId: "reactchat-4c648",
