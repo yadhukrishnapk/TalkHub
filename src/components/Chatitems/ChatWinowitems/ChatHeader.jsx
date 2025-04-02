@@ -10,8 +10,7 @@ const ChatHeader = ({ chatdet, username, isOpponentOnline, lastOnline }) => {
   };
 
   return (
-    <CardHeader className="border-b border-gray-800 flex flex-row items-center justify-between h-16 min-h-[4rem] sticky top-0 z-10 bg-black px-4">
-      <div className="flex items-center space-x-3">
+<CardHeader className="hidden md:flex border-b border-gray-800 flex-row items-center justify-between h-16 min-h-[4rem] sticky top-0 z-10 bg-black px-4">      <div className="flex items-center space-x-3">
         {chatdet.profilePic ? (
           <img
             src={chatdet.profilePic}
