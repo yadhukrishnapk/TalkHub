@@ -137,7 +137,7 @@ function Home() {
               <div className="flex flex-col items-center justify-center text-gray-400 h-full bg-black bg-opacity-80">
                 <div className="p-8 rounded-xl flex flex-col items-center max-w-md text-center">
                   <div className="bg-yellow-400 h-20 w-20 rounded-full flex items-center justify-center mb-6">
-                    <PlusIcon className="h-10 w-10 text-black" />
+                    <PlusIcon  onClick={() => setIsModalOpen(true)} className="h-10 w-10 text-black" />
                   </div>
                   <div className="text-2xl font-bold mb-2 text-white">No Active Chats</div>
                   <p className="text-gray-500 mb-6">Start a new conversation or select an existing chat.</p>

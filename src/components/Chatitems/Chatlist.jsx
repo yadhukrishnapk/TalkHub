@@ -97,30 +97,29 @@ function ChatList({ setActiveChat }) {
       </div>
 
       <Card className="rounded-none border-none shadow-none flex flex-col h-full bg-transparent relative z-10">
-        <CardHeader className="border-b border-zinc-800/50 shrink-0 px-6 py-4">
-          <div className="flex flex-col space-y-5">
-            <CardTitle className="flex items-center text-white">
-              <Users className="mr-3 h-7 w-7 text-yellow-400 animate-spin-slow" />
-              <span className="bg-clip-text text-transparent bg-gradient-to-r from-yellow-400 to-white font-extrabold text-2xl drop-shadow-md">
+        <CardHeader className="border-b border-zinc-800/50 shrink-0 px-4 sm:px-6 py-3 sm:py-4">
+          <div className="flex flex-col space-y-3 sm:space-y-5">
+            <CardTitle className="flex items-center justify-center sm:justify-start text-white">
+              <Users className="mr-2 sm:mr-3 h-6 sm:h-7 w-6 sm:w-7 text-yellow-400 animate-spin-slow" />
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-yellow-400 to-white font-extrabold text-xl sm:text-2xl drop-shadow-md">
                 My Chats
               </span>
             </CardTitle>
 
             {/* Search Input */}
             <div className="relative group">
-              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-zinc-400 group-hover:text-yellow-400 transition-colors duration-300" />
+              <Search className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 h-4 sm:h-5 w-4 sm:w-5 text-zinc-400 group-hover:text-yellow-400 transition-colors duration-300" />
               <input
                 type="text"
                 placeholder="Search chats..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-zinc-800/90 border border-yellow-500/30 rounded-tl-3xl rounded-br-3xl py-3 pl-12 pr-5 text-sm text-white focus:outline-none focus:border-yellow-400 focus:ring-2 focus:ring-yellow-400/50 transition-all duration-300 placeholder-zinc-500 shadow-md shadow-zinc-800/30"
+                className="w-full bg-zinc-800/90 border border-yellow-500/30 rounded-tl-2xl sm:rounded-tl-3xl rounded-br-2xl sm:rounded-br-3xl py-2 sm:py-3 pl-9 sm:pl-12 pr-3 sm:pr-5 text-xs sm:text-sm text-white focus:outline-none focus:border-yellow-400 focus:ring-1 sm:focus:ring-2 focus:ring-yellow-400/50 transition-all duration-300 placeholder-zinc-500 shadow-md shadow-zinc-800/30"
               />
-              <div className="absolute inset-0 -z-10 bg-yellow-400 opacity-0 group-hover:opacity-10 rounded-tl-3xl rounded-br-3xl transition-opacity duration-300"></div>
+              <div className="absolute inset-0 -z-10 bg-yellow-400 opacity-0 group-hover:opacity-10 rounded-tl-2xl sm:rounded-tl-3xl rounded-br-2xl sm:rounded-br-3xl transition-opacity duration-300"></div>
             </div>
           </div>
         </CardHeader>
-
         <CardContent className="p-0 flex-1 overflow-hidden">
           <ScrollArea className="h-full">
             {isLoading ? (
