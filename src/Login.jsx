@@ -8,6 +8,7 @@ import { useAtomValue, useSetAtom } from "jotai";
 import { globalState } from "./jotai/globalState";
 import { Navigate } from "react-router-dom";
 import Aurora from "./components/ui/Aurora";
+import PremiumModal from "./components/ui/preminumModal/PremiumModal";// Import the PremiumModal component
 
 const Login = () => {
   const [error, setError] = useState("");
@@ -15,6 +16,15 @@ const Login = () => {
   const googleProvider = new GoogleAuthProvider();
   const setUser = useSetAtom(globalState);
   const user = useAtomValue(globalState);
+  const [isPremiumModalOpen, setIsPremiumModalOpen] = useState(false);
+
+  const openPremiumModal = () => {
+    setIsPremiumModalOpen(true);
+  };
+
+  const closePremiumModal = () => {
+    setIsPremiumModalOpen(false);
+  };
 
   const handleGoogleSignIn = async () => {
     setError("");
@@ -68,6 +78,9 @@ const Login = () => {
 
   return (
     <div className="min-h-screen bg-black flex flex-col items-center justify-center px-4 sm:px-6 py-8 sm:py-0 relative overflow-hidden">
+      {/* Premium Modal Component */}
+      <PremiumModal isOpen={isPremiumModalOpen} onClose={closePremiumModal} />
+
       <div className="absolute top-0 left-0 w-full h-1/2">
         <Aurora
           colorStops={["#FFD700", "#FFA500", "#FF4500"]} 
@@ -130,8 +143,11 @@ const Login = () => {
             </span>
           </button>
 
-          {/* Premium Teaser */}
-          <div className="bg-zinc-800/90 p-4 sm:p-5 rounded-tl-xl sm:rounded-tl-2xl rounded-br-xl sm:rounded-br-2xl w-full border border-yellow-500/30 transition-all duration-300 hover:bg-zinc-800 hover:shadow-md sm:hover:shadow-lg hover:shadow-yellow-500/40 group backdrop-blur-sm">
+          {/* Premium Teaser - Now clickable to open modal */}
+          <div 
+            className="bg-zinc-800/90 p-4 sm:p-5 rounded-tl-xl sm:rounded-tl-2xl rounded-br-xl sm:rounded-br-2xl w-full border border-yellow-500/30 transition-all duration-300 hover:bg-zinc-800 hover:shadow-md sm:hover:shadow-lg hover:shadow-yellow-500/40 group backdrop-blur-sm cursor-pointer"
+            onClick={openPremiumModal}
+          >
             <p className="text-yellow-400 font-bold mb-1 sm:mb-2 text-base sm:text-lg flex items-center">
               <span className="mr-2 text-yellow-300 group-hover:animate-spin">✨</span> TalkHub Premium
             </p>
