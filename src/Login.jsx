@@ -151,6 +151,7 @@ const Login = () => {
             <span className="text-yellow-400 hover:text-yellow-300 cursor-pointer transition-colors duration-200 font-medium">
               Privacy Policy
             </span>
+            <p>with Yadhukrishna</p>
           </div>
         </div>
       </div>
