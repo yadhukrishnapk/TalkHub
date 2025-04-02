@@ -58,7 +58,6 @@ const useChatWindow = (initialUsername) => {
     return () => unsubscribe();
   }, [initialUsername, user]);
 
-  // Real-time messages listener
   useEffect(() => {
     if (!activeChat) return;
 

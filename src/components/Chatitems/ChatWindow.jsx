@@ -5,6 +5,7 @@ import ChatHeader from "./ChatWinowitems/ChatHeader";
 import ChatMessages from "./ChatWinowitems/ChatMessages";
 import NewMessagesBadge from "./ChatWinowitems/NewMessagesBadge";
 import MessageInput from "./ChatWinowitems/MessageInput";
+import ChatShimmerEffect from "../ui/Shimmers/ChatShimmer";
 
 function ChatWindow({ initialUsername }) {
   const {
@@ -28,12 +29,18 @@ function ChatWindow({ initialUsername }) {
     lastOnline,
   } = useChatWindow(initialUsername);
 
-  if (!username || !activeChat) {
+  // Handle no username selected
+  if (!username) {
     return (
       <div className="flex items-center justify-center text-gray-500 h-full">
-        {username ? "Loading chat..." : "Select a chat to start messaging"}
+        Select a chat to start messaging
       </div>
     );
+  }
+
+  // Show shimmer effect while loading
+  if (!activeChat || isLoading) {
+    return <ChatShimmerEffect />;
   }
 
   return (
@@ -48,7 +55,7 @@ function ChatWindow({ initialUsername }) {
         <CardContent className="flex flex-col flex-1 p-0 overflow-hidden">
           <ChatMessages
             scrollAreaRef={scrollAreaRef}
-            isLoading={isLoading}
+            isLoading={false} // We're handling loading state separately now
             groupedMessages={groupedMessages}
             user={user}
             formatMessageTime={formatMessageTime}
