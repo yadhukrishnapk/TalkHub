@@ -12,7 +12,7 @@ import { Users, MoreVertical, Trash2, Search, Star } from "lucide-react";
 import useChatList from "../../hooks/useChatlist";
 import { useSetAtom } from "jotai";
 import { chatdetails } from "../../jotai/globalState";
-import { Skeleton } from "@/components/ui/skeleton";
+import ChatListShimmer from "../ui/Shimmers/ChatListShimmer";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -123,17 +123,7 @@ function ChatList({ setActiveChat }) {
         <CardContent className="p-0 flex-1 overflow-hidden">
           <ScrollArea className="h-full">
             {isLoading ? (
-              <div className="space-y-5 p-6">
-                {[...Array(5)].map((_, index) => (
-                  <div key={index} className="flex items-center space-x-4">
-                    <Skeleton className="w-12 h-12 rounded-full bg-zinc-800/80" />
-                    <div className="flex-1 space-y-2">
-                      <Skeleton className="h-4 w-3/4 bg-zinc-800/80" />
-                      <Skeleton className="h-3 w-1/2 bg-zinc-800/80" />
-                    </div>
-                  </div>
-                ))}
-              </div>
+              <ChatListShimmer />
             ) : filteredChats.length > 0 ? (
               <div className="divide-y divide-zinc-800/50">
                 {filteredChats.map((chat) => (
