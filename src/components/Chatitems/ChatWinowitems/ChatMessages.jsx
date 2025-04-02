@@ -9,22 +9,22 @@ const ChatMessages = ({
   groupedMessages,
   user,
   formatMessageTime,
+  setReplyingTo, // New prop to set the message to reply to
 }) => {
-  // Format date beautifully
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     const today = new Date();
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
     
-    if (date.toDateString() === today.toDateString()) {
-      return "Today";
-    } else if (date.toDateString() === yesterday.toDateString()) {
-      return "Yesterday";
-    } else {
-      const options = { weekday: 'long', month: 'long', day: 'numeric' };
-      return date.toLocaleDateString(undefined, options);
-    }
+    if (date.toDateString() === today.toDateString()) return "Today";
+    if (date.toDateString() === yesterday.toDateString()) return "Yesterday";
+    const options = { weekday: "long", month: "long", day: "numeric" };
+    return date.toLocaleDateString(undefined, options);
+  };
+
+  const handleReplyClick = (msg) => {
+    setReplyingTo(msg); // Set the message to reply to
   };
 
   return (
@@ -40,9 +40,7 @@ const ChatMessages = ({
               <div className="flex items-center justify-center my-6">
                 <div className="bg-gray-900 px-6 py-2 rounded-full shadow-md flex items-center space-x-2 border border-gray-800">
                   <Calendar className="h-4 w-4 text-yellow-400" />
-                  <span className="text-gray-300 font-medium">
-                    {formatDate(date)}
-                  </span>
+                  <span className="text-gray-300 font-medium">{formatDate(date)}</span>
                 </div>
               </div>
               {dayMessages.map((msg) => (
@@ -51,8 +49,18 @@ const ChatMessages = ({
                   data-message-id={msg.id}
                   className={`flex flex-col ${
                     msg.sender === user.uid ? "items-end" : "items-start"
-                  } mb-2`}
+                  } mb-2 cursor-pointer hover:bg-gray-900/50 p-2 rounded-lg transition-colors`}
+                  onClick={() => handleReplyClick(msg)} // Add click handler
                 >
+                  {/* Display replied-to message if it exists */}
+                  {msg.replyTo && (
+                    <div className="max-w-[70%] mb-1 p-2 bg-gray-700/50 rounded-md text-sm text-gray-300">
+                      <span className="block font-semibold text-yellow-400">
+                        {msg.replyTo.sender === user.uid ? "You" : "Them"}:
+                      </span>
+                      {msg.replyTo.text}
+                    </div>
+                  )}
                   <div
                     className={`p-3 max-w-[70%] ${
                       msg.sender === user.uid

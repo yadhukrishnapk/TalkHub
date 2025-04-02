@@ -24,8 +24,8 @@ const useChatWindow = (initialUsername) => {
   const [isOpponentOnline, setIsOpponentOnline] = useState(false);
   const [lastOnline, setLastOnline] = useState(null);
   const hasMarkedRead = useRef(false);
+  const [replyingTo, setReplyingTo] = useState(null);
 
-  // Fetch chat ID
   useEffect(() => {
     if (!initialUsername || !user) return;
     fetchChatId(db, user, initialUsername, setActiveChat);
@@ -33,7 +33,6 @@ const useChatWindow = (initialUsername) => {
   console.log("chatdetyad", chatdet);
   
 
-  // Presence listener
   useEffect(() => {
     if (!initialUsername || !user) return;
 
@@ -70,7 +69,6 @@ const useChatWindow = (initialUsername) => {
     };
   }, [activeChat]);
 
-  // Mark unread messages as read
   useEffect(() => {
     if (!activeChat || !messages.length || !user.uid || hasMarkedRead.current) return;
 
@@ -103,12 +101,17 @@ const useChatWindow = (initialUsername) => {
   }, [messages]);
 
   const handleSendMessage = () => {
-    sendMessage(db, activeChat, newMessage, user.uid, (behavior) =>
-      scrollToBottom(scrollAreaRef, setNewMessagesCount, setIsAtBottom, behavior)
+    sendMessage(
+      db, 
+      activeChat, 
+      newMessage, 
+      user.uid, 
+      (behavior) => scrollToBottom(scrollAreaRef, setNewMessagesCount, setIsAtBottom, behavior),
+      replyingTo 
     );
     setNewMessage("");
+    setReplyingTo(null); 
   };
-
   const handleMarkMessageAsRead = (messageId) => {
     markMessageAsRead(db, activeChat, messageId, user.uid);
   };
@@ -182,6 +185,8 @@ const useChatWindow = (initialUsername) => {
     activeChat,
     setActiveChat,
     messages,
+    replyingTo,
+    setReplyingTo,
     sendMessage: handleSendMessage,
     setNewMessage,
     newMessage,
@@ -189,7 +194,7 @@ const useChatWindow = (initialUsername) => {
     setShowEmojiPicker,
     handleEmojiClick,
     scrollAreaRef,
-    isLoading: !activeChat || !messages, // Simplified loading state
+    isLoading: !activeChat || !messages, 
     chatdet,
     newMessagesCount,
     scrollToBottom: (behavior) => scrollToBottom(scrollAreaRef, setNewMessagesCount, setIsAtBottom, behavior),

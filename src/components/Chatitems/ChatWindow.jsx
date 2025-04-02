@@ -27,6 +27,8 @@ function ChatWindow({ initialUsername }) {
     user,
     isOpponentOnline,
     lastOnline,
+    replyingTo, // New
+    setReplyingTo,
   } = useChatWindow(initialUsername);
 
   // Handle no username selected
@@ -59,6 +61,7 @@ function ChatWindow({ initialUsername }) {
             groupedMessages={groupedMessages}
             user={user}
             formatMessageTime={formatMessageTime}
+            setReplyingTo={setReplyingTo}
           />
           <NewMessagesBadge
             newMessagesCount={newMessagesCount}
@@ -71,6 +74,8 @@ function ChatWindow({ initialUsername }) {
             showEmojiPicker={showEmojiPicker}
             setShowEmojiPicker={setShowEmojiPicker}
             handleEmojiClick={handleEmojiClick}
+            replyingTo={replyingTo} // Pass the message being replied to
+            setReplyingTo={setReplyingTo} // Pass the setter to clear it
           />
         </CardContent>
       </Card>

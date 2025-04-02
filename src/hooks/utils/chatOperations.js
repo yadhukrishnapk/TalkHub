@@ -1,26 +1,32 @@
 import { collection, addDoc, doc, updateDoc, arrayUnion, getDoc } from "firebase/firestore";
 
-export const sendMessage = async (db, activeChat, newMessage, userId, scrollToBottom) => {
+export const sendMessage = async (db, activeChat, newMessage, userId, scrollToBottom, replyingTo = null) => {
   if (!newMessage.trim() || !activeChat) return;
 
   try {
-    const messageRef = await addDoc(
-      collection(db, "chats", activeChat, "messages"),
-      {
-        sender: userId,
-        text: newMessage,
-        timestamp: new Date(),
-        status: "sent",
-        readBy: [userId], // Sender has "read" it by default
-      }
-    );
+    const messageData = {
+      sender: userId,
+      text: newMessage,
+      timestamp: new Date(),
+      status: "sent",
+      readBy: [userId],
+    };
 
-    // Check the message status before updating to "delivered"
+    // Add replyTo field if replying to a message
+    if (replyingTo) {
+      messageData.replyTo = {
+        id: replyingTo.id,
+        sender: replyingTo.sender,
+        text: replyingTo.text,
+      };
+    }
+
+    const messageRef = await addDoc(collection(db, "chats", activeChat, "messages"), messageData);
+
     setTimeout(async () => {
       const messageDoc = await getDoc(messageRef);
       const currentStatus = messageDoc.data().status;
 
-      // Only update to "delivered" if it hasn't been marked as "read"
       if (currentStatus === "sent") {
         await updateDoc(messageRef, {
           status: "delivered",
@@ -28,7 +34,9 @@ export const sendMessage = async (db, activeChat, newMessage, userId, scrollToBo
       }
     }, 1000);
 
-    setTimeout(() => scrollToBottom("smooth"), 100);
+    if (scrollToBottom) {
+      setTimeout(() => scrollToBottom("smooth"), 100);
+    }
   } catch (error) {
     console.error("Error sending message:", error);
   }
