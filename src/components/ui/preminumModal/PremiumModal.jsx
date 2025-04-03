@@ -1,5 +1,14 @@
 import React, { useState } from "react";
-import { X, Star, Shield, Zap, Crown, MessageSquare, Clock, Palette } from "lucide-react";
+import {
+  X,
+  Star,
+  Shield,
+  Zap,
+  Crown,
+  MessageSquare,
+  Clock,
+  Palette,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
@@ -10,16 +19,37 @@ const PremiumModal = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
 
   const features = [
-    { icon: <Shield className="h-5 w-5 text-blue-400" />, title: "Ad-Free Experience" },
-    { icon: <Zap className="h-5 w-5 text-purple-400" />, title: "Priority Support" },
-    { icon: <MessageSquare className="h-5 w-5 text-green-400" />, title: "Unlimited Messages" },
-    { icon: <Clock className="h-5 w-5 text-orange-400" />, title: "Message History" },
-    { icon: <Palette className="h-5 w-5 text-pink-400" />, title: "Custom Themes" }
+    {
+      icon: <Shield className="h-5 w-5 text-blue-400" />,
+      title: "Ad-Free Experience",
+    },
+    {
+      icon: <Zap className="h-5 w-5 text-purple-400" />,
+      title: "Priority Support",
+    },
+    {
+      icon: <MessageSquare className="h-5 w-5 text-green-400" />,
+      title: "Unlimited Messages",
+    },
+    {
+      icon: <Clock className="h-5 w-5 text-orange-400" />,
+      title: "Message History",
+    },
+    {
+      icon: <Palette className="h-5 w-5 text-pink-400" />,
+      title: "Custom Themes",
+    },
   ];
 
   const plans = [
-    { id: "monthly", name: "Monthly", price: "$9.99", period: "/month" },
-    { id: "yearly", name: "Yearly", price: "$89.99", period: "/year", savings: "Save 25%" }
+    { id: "monthly", name: "Monthly", price: "₹799", period: "/month" },
+    {
+      id: "yearly",
+      name: "Yearly",
+      price: "₹7199",
+      period: "/year",
+      savings: "Save 25%",
+    },
   ];
 
   return (
@@ -27,8 +57,8 @@ const PremiumModal = ({ isOpen, onClose }) => {
       <Card className="w-full max-w-2xl bg-zinc-900 border-zinc-800 rounded-xl relative">
         {/* Multiple close options */}
         <div className="absolute top-0 right-0 m-4">
-          <Button 
-            onClick={onClose} 
+          <Button
+            onClick={onClose}
             className="bg-zinc-800 hover:bg-zinc-700 rounded-full p-2 text-white"
             aria-label="Close modal"
           >
@@ -46,7 +76,8 @@ const PremiumModal = ({ isOpen, onClose }) => {
               <Crown className="h-5 w-5 text-black" />
             </div>
             <h2 className="text-xl font-bold text-white">
-              Upgrade to <span className="text-yellow-400">TalkHub Premium</span>
+              Upgrade to{" "}
+              <span className="text-yellow-400">TalkHub Premium</span>
             </h2>
           </div>
 
@@ -65,9 +96,13 @@ const PremiumModal = ({ isOpen, onClose }) => {
                       : "border-zinc-800 bg-zinc-900"
                   } rounded-lg p-4`}
                 >
-                  <h3 className="text-base font-medium text-white">{plan.name}</h3>
+                  <h3 className="text-base font-medium text-white">
+                    {plan.name}
+                  </h3>
                   <div className="flex items-end">
-                    <span className="text-2xl font-bold text-white">{plan.price}</span>
+                    <span className="text-2xl font-bold text-white">
+                      {plan.price}
+                    </span>
                     <span className="text-zinc-400 ml-1">{plan.period}</span>
                   </div>
                   {plan.savings && (
@@ -93,17 +128,22 @@ const PremiumModal = ({ isOpen, onClose }) => {
 
           {/* Action Buttons - Clear options with prominent close button */}
           <div className="flex flex-col sm:flex-row justify-center items-center gap-4 mt-6">
-            <Button 
+            <Button
               className="bg-gradient-to-r from-yellow-500 to-amber-600 text-black font-bold px-6 py-2 rounded-lg w-full sm:w-auto"
               onClick={() => {
                 // Handle subscription
                 onClose();
+                window.open(
+                  "https://me-qr.com/qr-code-generator/for-payment?srsltid=AfmBOop8AB59WerhFknn8R8Sr1DiHZ11K03bPbFZmQdCeiP_VFhoRCOM",
+                  "_blank",
+                  "noopener,noreferrer"
+                );
               }}
             >
               <Star className="h-4 w-4 mr-2" />
               Get {selectedPlan === "yearly" ? "Yearly" : "Monthly"}
             </Button>
-            
+
             <Button
               onClick={onClose}
               className="bg-zinc-800 hover:bg-zinc-700 text-white font-medium px-6 py-2 rounded-lg w-full sm:w-auto"
@@ -111,7 +151,7 @@ const PremiumModal = ({ isOpen, onClose }) => {
               Maybe Later
             </Button>
           </div>
-          
+
           {/* ESC key instruction */}
           <p className="text-zinc-500 text-center text-xs mt-4">
             Press ESC key or click outside to close
