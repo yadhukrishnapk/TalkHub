@@ -30,7 +30,7 @@ const useChatWindow = (initialUsername) => {
     if (!initialUsername || !user) return;
     fetchChatId(db, user, initialUsername, setActiveChat);
   }, [initialUsername, user]);
-  console.log("chatdetyad", chatdet);
+  // console.log("chatdetyad", chatdet);
   
 
   useEffect(() => {

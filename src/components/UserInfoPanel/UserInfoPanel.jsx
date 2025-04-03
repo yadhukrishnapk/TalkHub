@@ -21,7 +21,7 @@ const UserInfoPanel = ({ selectedUsername }) => {
   const [isOpponentOnline, setIsOpponentOnline] = useState(false);
   const [lastOnline, setLastOnline] = useState(null);
   const chatdet = useAtomValue(chatdetails);
-  console.log("chatdet on info", chatdet);
+  // console.log("chatdet on info", chatdet);
 
   useEffect(() => {
     const fetchUserInfo = async () => {
