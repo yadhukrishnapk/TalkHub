@@ -48,7 +48,7 @@ function Navbar() {
               </div>
               <span className="font-bold text-2xl md:text-3xl">
                 <span className="text-white">Talk</span>
-                <span className="text-yellow-400" style={{animation: 'pulse 7s ease-in-out infinite'}}>Hub</span>              </span>
+                <span className="text-yellow-400" style={{animation: 'pulse 5s ease-in-out infinite'}}>Hub</span>              </span>
             </div>
           </div>
 
