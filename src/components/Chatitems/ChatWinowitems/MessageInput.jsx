@@ -1,7 +1,11 @@
 import React, { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Send, Smile, ArrowUpCircle, X } from "lucide-react";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import EmojiPicker from "emoji-picker-react";
 
 const MessageInput = ({
@@ -67,7 +71,12 @@ const MessageInput = ({
             align="start"
             className="w-auto p-0 border border-zinc-800 bg-zinc-950 shadow-lg shadow-yellow-500/20 rounded-xl"
           >
-            <EmojiPicker onEmojiClick={handleEmojiClick} height={350} theme="dark" className="border-none" />
+            <EmojiPicker
+              onEmojiClick={handleEmojiClick}
+              height={350}
+              theme="dark"
+              className="border-none"
+            />
           </PopoverContent>
         </Popover>
 
@@ -112,7 +121,11 @@ const MessageInput = ({
 
       {newMessage.length > 0 && (
         <div className="flex justify-end mt-1 pr-2">
-          <span className={`text-xs ${newMessage.length > 500 ? "text-yellow-500" : "text-zinc-500"} transition-colors duration-300`}>
+          <span
+            className={`text-xs ${
+              newMessage.length > 500 ? "text-yellow-500" : "text-zinc-500"
+            } transition-colors duration-300`}
+          >
             {newMessage.length} / 1000
           </span>
         </div>

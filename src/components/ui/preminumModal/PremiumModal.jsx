@@ -32,7 +32,7 @@ const PremiumModal = ({ isOpen, onClose }) => {
       title: "Unlimited Messages",
     },
     {
-      icon: <Clock className="h-5 w-5 text-orange-400" />,
+      icon: <Clock className="h-5 w-5 text-yellow-400" />,
       title: "Message History",
     },
     {
@@ -72,7 +72,7 @@ const PremiumModal = ({ isOpen, onClose }) => {
         <div className="p-6">
           {/* Header */}
           <div className="flex items-center justify-center gap-3 mb-4">
-            <div className="bg-gradient-to-br from-yellow-400 to-amber-600 p-2 rounded-lg">
+            <div className="bg-gradient-to-br from-yellow-400 to-yellow-600 p-2 rounded-lg">
               <Crown className="h-5 w-5 text-black" />
             </div>
             <h2 className="text-xl font-bold text-white">
@@ -129,7 +129,7 @@ const PremiumModal = ({ isOpen, onClose }) => {
           {/* Action Buttons - Clear options with prominent close button */}
           <div className="flex flex-col sm:flex-row justify-center items-center gap-4 mt-6">
             <Button
-              className="bg-gradient-to-r from-yellow-500 to-amber-600 text-black font-bold px-6 py-2 rounded-lg w-full sm:w-auto"
+              className="bg-gradient-to-r from-yellow-500 to-yellow-600 text-black font-bold px-6 py-2 rounded-lg w-full sm:w-auto"
               onClick={() => {
                 // Handle subscription
                 onClose();

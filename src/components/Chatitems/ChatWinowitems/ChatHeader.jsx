@@ -2,7 +2,13 @@ import React from "react";
 import { CardHeader } from "@/components/ui/card";
 import { MessageCircleIcon } from "lucide-react";
 
-const ChatHeader = ({ chatdet, username, isOpponentOnline, lastOnline, isOpponentTyping }) => {
+const ChatHeader = ({
+  chatdet,
+  username,
+  isOpponentOnline,
+  lastOnline,
+  isOpponentTyping,
+}) => {
   const formatLastSeen = (timestamp) => {
     if (!timestamp) return "Last seen: Unknown";
     const date = new Date(timestamp);
@@ -33,16 +39,22 @@ const ChatHeader = ({ chatdet, username, isOpponentOnline, lastOnline, isOpponen
               {(chatdet.chatname || username).split(" ").slice(1).join(" ")}
             </span>
           </div>
-          
+
           {/* Status Indicator */}
           <div className="text-sm">
             {isOpponentTyping ? (
               <div className="flex items-center">
                 <span className="text-green-400 font-medium">Typing</span>
                 <span className="ml-1 inline-flex items-center">
-                  <span className="animate-bounce text-green-400 delay-0">.</span>
-                  <span className="animate-bounce text-green-400 delay-150">.</span>
-                  <span className="animate-bounce text-green-400 delay-300">.</span>
+                  <span className="animate-bounce text-green-400 delay-0">
+                    .
+                  </span>
+                  <span className="animate-bounce text-green-400 delay-150">
+                    .
+                  </span>
+                  <span className="animate-bounce text-green-400 delay-300">
+                    .
+                  </span>
                 </span>
               </div>
             ) : isOpponentOnline ? (

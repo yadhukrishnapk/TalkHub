@@ -17,49 +17,55 @@ const TypingIndicator = React.memo(() => (
 ));
 
 // Memoized Message component to optimize individual message rendering
-const Message = React.memo(({ msg, user, formatMessageTime, handleReplyClick }) => {
-  const isUserMessage = msg.sender === user.uid;
-  const statusIcon =
-    msg.status === "read" ? (
-      <CheckCheck className="h-4 w-4 text-yellow-400" />
-    ) : (
-      <CheckIcon className="h-4 w-4 text-gray-600" />
-    );
+const Message = React.memo(
+  ({ msg, user, formatMessageTime, handleReplyClick }) => {
+    const isUserMessage = msg.sender === user.uid;
+    const statusIcon =
+      msg.status === "read" ? (
+        <CheckCheck className="h-4 w-4 text-yellow-400" />
+      ) : (
+        <CheckIcon className="h-4 w-4 text-gray-600" />
+      );
 
-  return (
-    <div
-      className={`flex flex-col ${isUserMessage ? "items-end" : "items-start"} mb-2 cursor-pointer hover:bg-gray-900/50 p-2 rounded-lg transition-colors`}
-      onClick={() => handleReplyClick(msg)}
-      data-message-id={msg.id}
-    >
-      {msg.replyTo && (
-        <div className="max-w-[70%] mb-1 p-2 bg-gray-700/50 rounded-md text-sm text-gray-300">
-          <span className="block font-semibold text-yellow-400">
-            {msg.replyTo.sender === user.uid ? "You" : "Them"}:
-          </span>
-          {msg.replyTo.text}
+    return (
+      <div
+        className={`flex flex-col ${
+          isUserMessage ? "items-end" : "items-start"
+        } mb-2 cursor-pointer hover:bg-gray-900/50 p-2 rounded-lg transition-colors`}
+        onClick={() => handleReplyClick(msg)}
+        data-message-id={msg.id}
+      >
+        {msg.replyTo && (
+          <div className="max-w-[70%] mb-1 p-2 bg-gray-700/50 rounded-md text-sm text-gray-300">
+            <span className="block font-semibold text-yellow-400">
+              {msg.replyTo.sender === user.uid ? "You" : "Them"}:
+            </span>
+            {msg.replyTo.text}
+          </div>
+        )}
+        <div
+          className={`p-3 max-w-[70%] shadow-md ${
+            isUserMessage
+              ? "bg-yellow-400 text-black font-medium rounded-tr-3xl rounded-bl-3xl rounded-tl-md rounded-br-md"
+              : "bg-gray-800 text-white rounded-tl-3xl rounded-br-3xl rounded-tr-md rounded-bl-md"
+          }`}
+        >
+          {msg.text}
         </div>
-      )}
-      <div
-        className={`p-3 max-w-[70%] shadow-md ${
-          isUserMessage
-            ? "bg-yellow-400 text-black font-medium rounded-tr-3xl rounded-bl-3xl rounded-tl-md rounded-br-md"
-            : "bg-gray-800 text-white rounded-tl-3xl rounded-br-3xl rounded-tr-md rounded-bl-md"
-        }`}
-      >
-        {msg.text}
+        <div
+          className={`text-xs text-gray-500 flex items-center space-x-1 mt-1 ${
+            isUserMessage ? "justify-end" : "justify-start"
+          }`}
+        >
+          <span>{formatMessageTime(msg.timestamp)}</span>
+          {isUserMessage && (
+            <div className="flex space-x-0.5">{statusIcon}</div>
+          )}
+        </div>
       </div>
-      <div
-        className={`text-xs text-gray-500 flex items-center space-x-1 mt-1 ${
-          isUserMessage ? "justify-end" : "justify-start"
-        }`}
-      >
-        <span>{formatMessageTime(msg.timestamp)}</span>
-        {isUserMessage && <div className="flex space-x-0.5">{statusIcon}</div>}
-      </div>
-    </div>
-  );
-});
+    );
+  }
+);
 
 // Memoized DateHeader to avoid re-rendering unchanged dates
 const DateHeader = React.memo(({ date, formatDate }) => (
@@ -97,11 +103,16 @@ const ChatMessages = ({
   }, []);
 
   // Memoized reply handler
-  const handleReplyClick = useCallback((msg) => setReplyingTo(msg), [setReplyingTo]);
+  const handleReplyClick = useCallback(
+    (msg) => setReplyingTo(msg),
+    [setReplyingTo]
+  );
 
   // Optimized scrolling function
   const scrollToBottom = useCallback(() => {
-    const scrollContainer = scrollAreaRef.current?.querySelector("[data-radix-scroll-area-viewport]");
+    const scrollContainer = scrollAreaRef.current?.querySelector(
+      "[data-radix-scroll-area-viewport]"
+    );
     if (scrollContainer) {
       scrollContainer.scrollTo({
         top: scrollContainer.scrollHeight,

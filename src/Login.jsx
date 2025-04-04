@@ -1,5 +1,9 @@
 import React, { useState } from "react";
-import { signInWithPopup, GoogleAuthProvider, updateProfile } from "firebase/auth";
+import {
+  signInWithPopup,
+  GoogleAuthProvider,
+  updateProfile,
+} from "firebase/auth";
 import { doc, setDoc, getDoc } from "firebase/firestore";
 import { ref, set } from "firebase/database";
 import { auth, db, realtimeDb } from "./firebase";
@@ -8,7 +12,7 @@ import { useAtomValue, useSetAtom } from "jotai";
 import { globalState } from "./jotai/globalState";
 import { Navigate } from "react-router-dom";
 import Aurora from "./components/ui/Aurora";
-import PremiumModal from "./components/ui/preminumModal/PremiumModal";// Import the PremiumModal component
+import PremiumModal from "./components/ui/preminumModal/PremiumModal"; // Import the PremiumModal component
 
 const Login = () => {
   const [error, setError] = useState("");
@@ -83,10 +87,10 @@ const Login = () => {
 
       <div className="absolute top-0 left-0 w-full h-1/2">
         <Aurora
-          colorStops={["#FFD700", "#FFA500", "#FF4500"]} 
-          blend={0.9} 
-          amplitude={1.5} 
-          speed={0.7} 
+          colorStops={["#FFD700", "#FFA500", "#FF4500"]}
+          blend={0.9}
+          amplitude={1.5}
+          speed={0.7}
         />
       </div>
 
@@ -98,8 +102,12 @@ const Login = () => {
       {/* Logo Section */}
       <div className="mb-8 sm:mb-12 relative z-10 text-center">
         <h1 className="text-5xl sm:text-7xl font-extrabold tracking-tight">
-          <span className="bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-300">Talk</span>
-          <span className="bg-clip-text text-transparent bg-gradient-to-r from-yellow-400 to-yellow-600 animate-pulse">Hub</span>
+          <span className="bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-300">
+            Talk
+          </span>
+          <span className="bg-clip-text text-transparent bg-gradient-to-r from-yellow-400 to-yellow-600 animate-pulse">
+            Hub
+          </span>
         </h1>
         <p className="text-gray-300 text-center mt-3 sm:mt-4 text-lg sm:text-xl font-medium drop-shadow-md">
           Connect and Chat With The World
@@ -129,27 +137,39 @@ const Login = () => {
               flex items-center justify-center w-full py-3 sm:py-4 px-6 sm:px-8 
               rounded-tl-2xl sm:rounded-tl-3xl rounded-br-2xl sm:rounded-br-3xl 
               transition-all duration-300 transform
-              ${loading
-                ? "bg-zinc-700/80 cursor-not-allowed opacity-70"
-                : "bg-yellow-500 hover:bg-yellow-400 text-black font-bold hover:shadow-lg sm:hover:shadow-xl hover:shadow-yellow-500/50 hover:scale-102 sm:hover:scale-105 active:scale-98"
+              ${
+                loading
+                  ? "bg-zinc-700/80 cursor-not-allowed opacity-70"
+                  : "bg-yellow-500 hover:bg-yellow-400 text-black font-bold hover:shadow-lg sm:hover:shadow-xl hover:shadow-yellow-500/50 hover:scale-102 sm:hover:scale-105 active:scale-98"
               }`}
           >
             <LogInIcon
               size={24}
-              className={`mr-2 sm:mr-3 ${loading ? "text-zinc-400 animate-spin" : "text-black animate-bounce"}`}
+              className={`mr-2 sm:mr-3 ${
+                loading
+                  ? "text-zinc-400 animate-spin"
+                  : "text-black animate-bounce"
+              }`}
             />
-            <span className={`text-base sm:text-lg font-semibold ${loading ? "text-zinc-300" : "text-black"}`}>
+            <span
+              className={`text-base sm:text-lg font-semibold ${
+                loading ? "text-zinc-300" : "text-black"
+              }`}
+            >
               {loading ? "Connecting..." : "Sign in with Google"}
             </span>
           </button>
 
           {/* Premium Teaser - Now clickable to open modal */}
-          <div 
+          <div
             className="bg-zinc-800/90 p-4 sm:p-5 rounded-tl-xl sm:rounded-tl-2xl rounded-br-xl sm:rounded-br-2xl w-full border border-yellow-500/30 transition-all duration-300 hover:bg-zinc-800 hover:shadow-md sm:hover:shadow-lg hover:shadow-yellow-500/40 group backdrop-blur-sm cursor-pointer"
             onClick={openPremiumModal}
           >
             <p className="text-yellow-400 font-bold mb-1 sm:mb-2 text-base sm:text-lg flex items-center">
-              <span className="mr-2 text-yellow-300 group-hover:animate-spin">✨</span> TalkHub Premium
+              <span className="mr-2 text-yellow-300 group-hover:animate-spin">
+                ✨
+              </span>{" "}
+              TalkHub Premium
             </p>
             <p className="text-gray-200 text-xs sm:text-sm leading-relaxed drop-shadow-sm">
               Unlock exclusive chat rooms and advanced features!

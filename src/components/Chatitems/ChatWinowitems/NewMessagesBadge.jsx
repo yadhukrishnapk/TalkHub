@@ -8,7 +8,7 @@ const NewMessagesBadge = ({ newMessagesCount, scrollToBottom }) => (
       <div className="sticky bottom-4 flex justify-center animate-bounce">
         <Button
           variant="outline"
-          className="rounded-full bg-orange-500 text-white flex items-center space-x-2"
+          className="rounded-full bg-yellow-500 text-white flex items-center space-x-2"
           onClick={() => scrollToBottom("smooth")}
         >
           <span>New Messages ({newMessagesCount})</span>
@@ -18,6 +18,5 @@ const NewMessagesBadge = ({ newMessagesCount, scrollToBottom }) => (
     )}
   </>
 );
-
 
 export default NewMessagesBadge;

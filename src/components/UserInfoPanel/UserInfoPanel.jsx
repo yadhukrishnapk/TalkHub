@@ -1,12 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  UserCircle2,
-  FileText,
-  Clock,
-  Calendar,
-  VideoOff,
-} from "lucide-react";
+import { UserCircle2, FileText, Clock, Calendar, VideoOff } from "lucide-react";
 import { useAtomValue } from "jotai";
 import { chatdetails, globalState } from "../../jotai/globalState";
 import { doc, getDoc } from "firebase/firestore";
@@ -92,7 +86,9 @@ const UserInfoPanel = ({ selectedUsername }) => {
   if (loading) {
     return (
       <div className="bg-[#121212] text-white h-full flex items-center justify-center">
-        <div className="animate-pulse text-yellow-400 font-medium">Loading user information...</div>
+        <div className="animate-pulse text-yellow-400 font-medium">
+          Loading user information...
+        </div>
       </div>
     );
   }
@@ -132,7 +128,11 @@ const UserInfoPanel = ({ selectedUsername }) => {
                 isOpponentOnline ? "text-green-500" : "text-gray-400"
               }`}
             >
-              <span className={`w-2 h-2 rounded-full mr-1 ${isOpponentOnline ? "bg-green-500" : "bg-gray-400"} animate-pulse`}></span>
+              <span
+                className={`w-2 h-2 rounded-full mr-1 ${
+                  isOpponentOnline ? "bg-green-500" : "bg-gray-400"
+                } animate-pulse`}
+              ></span>
               {isOpponentOnline ? "Online" : "Offline"}
             </span>
             {!isOpponentOnline && (
@@ -183,7 +183,7 @@ const UserInfoPanel = ({ selectedUsername }) => {
 
       {/* Chat Actions Section */}
       <div className="p-6 border-t border-gray-800 relative z-10">
-        <Button 
+        <Button
           className="
             w-full bg-yellow-400 text-black font-medium flex items-center justify-center 
             py-3 rounded-tl-3xl rounded-br-3xl 

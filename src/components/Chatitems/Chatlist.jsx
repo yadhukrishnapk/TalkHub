@@ -131,7 +131,10 @@ function ChatList({ setActiveChat }) {
               <div className="divide-y divide-zinc-800/50">
                 {filteredChats.map((chat) => {
                   // Use utility function instead of hook
-                  const truncatedMessageText = truncateMessage(chat.lastMessage?.text || "", 15);
+                  const truncatedMessageText = truncateMessage(
+                    chat.lastMessage?.text || "",
+                    15
+                  );
                   return (
                     <TooltipProvider key={chat.refid}>
                       <Tooltip>
@@ -189,7 +192,9 @@ function ChatList({ setActiveChat }) {
                                 </div>
                                 {chat.lastMessage && (
                                   <span className="text-xs text-zinc-400 font-medium">
-                                    {formatTimestamp(chat.lastMessage.timestamp)}
+                                    {formatTimestamp(
+                                      chat.lastMessage.timestamp
+                                    )}
                                   </span>
                                 )}
                               </div>
