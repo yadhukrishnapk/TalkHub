@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Send, Smile, ArrowUpCircle, X } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -11,9 +11,18 @@ const MessageInput = ({
   showEmojiPicker,
   setShowEmojiPicker,
   handleEmojiClick,
-  replyingTo, // New prop
-  setReplyingTo, // New prop to clear the reply
+  replyingTo,
+  setReplyingTo,
+  chatdet, // Add chatdet prop
+  username, // Add username prop
 }) => {
+  // Track typing activity
+  useEffect(() => {
+    if (newMessage) {
+      console.log("User typing:", { chatdet, username });
+    }
+  }, [newMessage, chatdet, username]);
+
   return (
     <div className="p-4 border-t border-gray-700 bg-zinc-950 relative overflow-hidden">
       <div className="absolute inset-0 pointer-events-none">

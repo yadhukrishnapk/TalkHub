@@ -27,11 +27,11 @@ function ChatWindow({ initialUsername }) {
     user,
     isOpponentOnline,
     lastOnline,
-    replyingTo, // New
+    replyingTo,
     setReplyingTo,
+    isOpponentTyping, // New
   } = useChatWindow(initialUsername);
 
-  // Handle no username selected
   if (!username) {
     return (
       <div className="flex items-center justify-center text-gray-500 h-full">
@@ -40,7 +40,6 @@ function ChatWindow({ initialUsername }) {
     );
   }
 
-  // Show shimmer effect while loading
   if (!activeChat || isLoading) {
     return <ChatShimmerEffect />;
   }
@@ -53,15 +52,17 @@ function ChatWindow({ initialUsername }) {
           username={username}
           isOpponentOnline={isOpponentOnline}
           lastOnline={lastOnline}
+          isOpponentTyping={isOpponentTyping} // Pass to ChatHeader
         />
         <CardContent className="flex flex-col flex-1 p-0 overflow-hidden">
           <ChatMessages
             scrollAreaRef={scrollAreaRef}
-            isLoading={false} // We're handling loading state separately now
+            isLoading={false}
             groupedMessages={groupedMessages}
             user={user}
             formatMessageTime={formatMessageTime}
             setReplyingTo={setReplyingTo}
+            isOpponentTyping={isOpponentTyping}
           />
           <NewMessagesBadge
             newMessagesCount={newMessagesCount}
@@ -74,8 +75,10 @@ function ChatWindow({ initialUsername }) {
             showEmojiPicker={showEmojiPicker}
             setShowEmojiPicker={setShowEmojiPicker}
             handleEmojiClick={handleEmojiClick}
-            replyingTo={replyingTo} // Pass the message being replied to
-            setReplyingTo={setReplyingTo} // Pass the setter to clear it
+            replyingTo={replyingTo}
+            setReplyingTo={setReplyingTo}
+            chatdet={chatdet}
+            username={username}
           />
         </CardContent>
       </Card>

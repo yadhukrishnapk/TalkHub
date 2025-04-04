@@ -6,7 +6,7 @@ import { formatMessageTime } from "./utils/timeFormat";
 import { sendMessage, markMessageAsRead, fetchChatId } from "./utils/chatOperations";
 import { getScrollElement, checkIsAtBottom, scrollToBottom } from "./utils/scrollUtils";
 import { observeMessages } from "./utils/intersectionUtils";
-import { ref, onValue } from "firebase/database";
+import { ref, onValue, set } from "firebase/database";
 import { db, realtimeDb } from "../firebase";
 
 const useChatWindow = (initialUsername) => {
@@ -23,55 +23,42 @@ const useChatWindow = (initialUsername) => {
   const observerRef = useRef(null);
   const [isOpponentOnline, setIsOpponentOnline] = useState(false);
   const [lastOnline, setLastOnline] = useState(null);
+  const [isOpponentTyping, setIsOpponentTyping] = useState(false); // New state for opponent's typing
   const hasMarkedRead = useRef(false);
   const [replyingTo, setReplyingTo] = useState(null);
+  const typingTimeoutRef = useRef(null); // To debounce typing updates
 
+  // Fetch chat ID
   useEffect(() => {
     if (!initialUsername || !user) return;
     fetchChatId(db, user, initialUsername, setActiveChat);
   }, [initialUsername, user]);
-  // console.log("chatdetyad", chatdet);
-  
 
+  // Monitor opponent's online status
   useEffect(() => {
     if (!initialUsername || !user) return;
-
     const lowercaseUsername = initialUsername.toLowerCase();
     const presenceRef = ref(realtimeDb, `presence/${lowercaseUsername}`);
-
-    const handlePresenceChange = (snapshot) => {
-      if (snapshot.exists()) {
-        const data = snapshot.val();
-        setIsOpponentOnline(data?.online || false);
-        setLastOnline(data?.lastOnline || null);
-      } else {
-        setIsOpponentOnline(false);
-        setLastOnline(null);
-      }
-    };
-
-    const unsubscribe = onValue(presenceRef, handlePresenceChange, (error) => {
-      console.error("Presence listener error:", error);
+    const unsubscribe = onValue(presenceRef, (snapshot) => {
+      const data = snapshot.val();
+      setIsOpponentOnline(data?.online || false);
+      setLastOnline(data?.lastOnline || null);
     });
-
     return () => unsubscribe();
   }, [initialUsername, user]);
 
+  // Fetch messages
   useEffect(() => {
     if (!activeChat) return;
-
     const unsubscribe = fetchMessages(db, activeChat, (msgs) => {
       setMessages(msgs);
     });
-
-    return () => {
-      unsubscribe();
-    };
+    return () => unsubscribe();
   }, [activeChat]);
 
+  // Mark messages as read
   useEffect(() => {
     if (!activeChat || !messages.length || !user.uid || hasMarkedRead.current) return;
-
     const unreadMessages = messages.filter(
       (msg) => !msg.readBy?.includes(user.uid) && msg.sender !== user.uid
     );
@@ -90,6 +77,7 @@ const useChatWindow = (initialUsername) => {
     hasMarkedRead.current = false;
   }, [activeChat]);
 
+  // Group messages by date
   const groupedMessages = useMemo(() => {
     const groups = {};
     messages.forEach((msg) => {
@@ -100,18 +88,66 @@ const useChatWindow = (initialUsername) => {
     return groups;
   }, [messages]);
 
+  // Send typing status to Firebase
+  useEffect(() => {
+    if (!activeChat || !user.uid) return;
+
+    const typingRef = ref(realtimeDb, `typing/${activeChat}/${user.uid}`);
+
+    if (newMessage.trim()) {
+      // User is typing
+      if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+      set(typingRef, { isTyping: true, timestamp: Date.now() });
+
+      // Stop typing after 2 seconds of inactivity
+      typingTimeoutRef.current = setTimeout(() => {
+        set(typingRef, { isTyping: false, timestamp: Date.now() });
+      }, 2000);
+    } else {
+      // User stopped typing
+      if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+      set(typingRef, { isTyping: false, timestamp: Date.now() });
+    }
+
+    return () => {
+      if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+      set(typingRef, { isTyping: false, timestamp: Date.now() });
+    };
+  }, [newMessage, activeChat, user.uid]);
+
+  // Listen for opponent's typing status
+  useEffect(() => {
+    if (!activeChat || !initialUsername || !user) return;
+
+    const opponentTypingRef = ref(realtimeDb, `typing/${activeChat}`);
+    const unsubscribe = onValue(opponentTypingRef, (snapshot) => {
+      const typingData = snapshot.val();
+      if (typingData) {
+        const opponentData = Object.entries(typingData).find(
+          ([uid]) => uid !== user.uid
+        );
+        setIsOpponentTyping(opponentData ? opponentData[1].isTyping : false);
+      } else {
+        setIsOpponentTyping(false);
+      }
+    });
+
+    return () => unsubscribe();
+  }, [activeChat, user, initialUsername]);
+
   const handleSendMessage = () => {
     sendMessage(
-      db, 
-      activeChat, 
-      newMessage, 
-      user.uid, 
+      db,
+      activeChat,
+      newMessage,
+      user.uid,
       (behavior) => scrollToBottom(scrollAreaRef, setNewMessagesCount, setIsAtBottom, behavior),
-      replyingTo 
+      replyingTo
     );
     setNewMessage("");
-    setReplyingTo(null); 
+    setReplyingTo(null);
   };
+
   const handleMarkMessageAsRead = (messageId) => {
     markMessageAsRead(db, activeChat, messageId, user.uid);
   };
@@ -121,22 +157,17 @@ const useChatWindow = (initialUsername) => {
     setShowEmojiPicker(false);
   };
 
+  // Scroll and observer logic (unchanged)
   useEffect(() => {
     if (!scrollAreaRef.current || !messages.length || !activeChat) return;
-
     if (observerRef.current) observerRef.current.disconnect();
-
     observerRef.current = observeMessages(messages, user.uid, handleMarkMessageAsRead, scrollAreaRef);
-
     const scrollElement = getScrollElement(scrollAreaRef);
     if (scrollElement) {
       const messageElements = scrollElement.querySelectorAll("[data-message-id]");
       messageElements.forEach((element) => observerRef.current.observe(element));
     }
-
-    return () => {
-      if (observerRef.current) observerRef.current.disconnect();
-    };
+    return () => observerRef.current?.disconnect();
   }, [messages, activeChat, user.uid]);
 
   useEffect(() => {
@@ -154,12 +185,9 @@ const useChatWindow = (initialUsername) => {
 
   useEffect(() => {
     if (!messages.length || !scrollAreaRef.current) return;
-
     const scrollElement = getScrollElement(scrollAreaRef);
     const lastMessage = messages[messages.length - 1];
     const isLastMessageFromUser = lastMessage?.sender === user.uid;
-
-
     if (isLastMessageFromUser) {
       setTimeout(() => scrollToBottom(scrollAreaRef, setNewMessagesCount, setIsAtBottom, "smooth"), 100);
     } else if (!isAtBottom) {
@@ -168,7 +196,6 @@ const useChatWindow = (initialUsername) => {
       ).length;
       setNewMessagesCount(unreadCount > 0 ? unreadCount : messages.length - lastMessageCountRef.current);
     }
-
     lastMessageCountRef.current = messages.length;
   }, [messages, user.uid, activeChat]);
 
@@ -194,7 +221,7 @@ const useChatWindow = (initialUsername) => {
     setShowEmojiPicker,
     handleEmojiClick,
     scrollAreaRef,
-    isLoading: !activeChat || !messages, 
+    isLoading: !activeChat || !messages,
     chatdet,
     newMessagesCount,
     scrollToBottom: (behavior) => scrollToBottom(scrollAreaRef, setNewMessagesCount, setIsAtBottom, behavior),
@@ -205,6 +232,7 @@ const useChatWindow = (initialUsername) => {
     markMessageAsRead: handleMarkMessageAsRead,
     isOpponentOnline,
     lastOnline,
+    isOpponentTyping, // Return new state
   };
 };
 

@@ -31,9 +31,12 @@ function Navbar() {
     setIsPremiumModalOpen(true);
   };
 
+
   const closePremiumModal = () => {
     setIsPremiumModalOpen(false);
   };
+  console.log("user loged", user);
+  
 
   return (
     <>
