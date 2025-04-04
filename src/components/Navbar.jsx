@@ -42,7 +42,7 @@ function Navbar() {
           {/* Logo and Navigation */}
           <div className="flex items-center gap-6">
             <div className="flex items-center gap-2">
-              <div className="relative w-8 h-8 flex items-center justify-center">
+              <div className="relative w-8 h-8 flex items-center justify-center hover:rotate-45">
                 <div className="absolute inset-0 bg-yellow-400 rounded-lg transform rotate-45"></div>
                 <span className="relative font-bold text-black z-10">TH</span>
               </div>
