@@ -31,6 +31,9 @@ import { Badge } from "@/components/ui/badge";
 import { ref, onValue, off } from "firebase/database";
 import { realtimeDb } from "../../firebase";
 
+// Import the modified truncateMessage utility function, not the hook
+import { truncateMessage } from "../../hooks/useTruncateMessage";
+
 function ChatList({ setActiveChat }) {
   const { chatList, isLoading, deleteChat } = useChatList();
   const setChatdet = useSetAtom(chatdetails);
@@ -126,110 +129,113 @@ function ChatList({ setActiveChat }) {
               <ChatListShimmer />
             ) : filteredChats.length > 0 ? (
               <div className="divide-y divide-zinc-800/50">
-                {filteredChats.map((chat) => (
-                  <TooltipProvider key={chat.refid}>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <div
-                          onClick={() =>
-                            handleChatSelect(
-                              chat.refid,
-                              chat.name,
-                              chat.profilePic
-                            )
-                          }
-                          className="
-                            p-5 
-                            hover:bg-zinc-800/80 
-                            cursor-pointer 
-                            flex 
-                            items-center 
-                            space-x-4 
-                            transition-all duration-300
-                            relative
-                            group
-                          "
-                        >
-                          <div className="relative">
-                            {chat.profilePic ? (
-                              <img
-                                src={chat.profilePic}
-                                alt={chat.name}
-                                className="w-12 h-12 rounded-tl-2xl rounded-br-2xl object-cover border-2 border-yellow-500/30 group-hover:shadow-md group-hover:shadow-yellow-500/20 transition-all duration-300"
-                              />
-                            ) : (
-                              <div className="w-12 h-12 rounded-tl-2xl rounded-br-2xl bg-zinc-700 flex items-center justify-center border-2 border-zinc-600">
-                                <Users className="h-6 w-6 text-zinc-300 animate-pulse" />
-                              </div>
-                            )}
-                            <span
-                              className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-zinc-900 animate-pulse ${
-                                onlineStatus[chat.name]
-                                  ? "bg-green-500"
-                                  : "bg-gray-400"
-                              }`}
-                            ></span>{" "}
-                          </div>
+                {filteredChats.map((chat) => {
+                  // Use utility function instead of hook
+                  const truncatedMessageText = truncateMessage(chat.lastMessage?.text || "", 15);
+                  return (
+                    <TooltipProvider key={chat.refid}>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div
+                            onClick={() =>
+                              handleChatSelect(
+                                chat.refid,
+                                chat.name,
+                                chat.profilePic
+                              )
+                            }
+                            className="
+                              p-5 
+                              hover:bg-zinc-800/80 
+                              cursor-pointer 
+                              flex 
+                              items-center 
+                              space-x-4 
+                              transition-all duration-300
+                              relative
+                              group
+                            "
+                          >
+                            <div className="relative">
+                              {chat.profilePic ? (
+                                <img
+                                  src={chat.profilePic}
+                                  alt={chat.name}
+                                  className="w-12 h-12 rounded-tl-2xl rounded-br-2xl object-cover border-2 border-yellow-500/30 group-hover:shadow-md group-hover:shadow-yellow-500/20 transition-all duration-300"
+                                />
+                              ) : (
+                                <div className="w-12 h-12 rounded-tl-2xl rounded-br-2xl bg-zinc-700 flex items-center justify-center border-2 border-zinc-600">
+                                  <Users className="h-6 w-6 text-zinc-300 animate-pulse" />
+                                </div>
+                              )}
+                              <span
+                                className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-zinc-900 animate-pulse ${
+                                  onlineStatus[chat.name]
+                                    ? "bg-green-500"
+                                    : "bg-gray-400"
+                                }`}
+                              ></span>
+                            </div>
 
-                          <div className="flex-1 overflow-hidden">
-                            <div className="flex items-center justify-between">
-                              <div className="font-semibold truncate text-white flex items-center text-lg">
-                                {chat.name}
-                                {isVerified(chat.refid) && (
-                                  <span className="ml-2 flex items-center">
-                                    <Star className="h-4 w-4 text-yellow-400 fill-yellow-400 animate-spin-slow" />
+                            <div className="flex-1 overflow-hidden">
+                              <div className="flex items-center justify-between">
+                                <div className="font-semibold truncate text-white flex items-center text-lg">
+                                  {chat.name}
+                                  {isVerified(chat.refid) && (
+                                    <span className="ml-2 flex items-center">
+                                      <Star className="h-4 w-4 text-yellow-400 fill-yellow-400 animate-spin-slow" />
+                                    </span>
+                                  )}
+                                </div>
+                                {chat.lastMessage && (
+                                  <span className="text-xs text-zinc-400 font-medium">
+                                    {formatTimestamp(chat.lastMessage.timestamp)}
                                   </span>
                                 )}
                               </div>
-                              {chat.lastMessage && (
-                                <span className="text-xs text-zinc-400 font-medium">
-                                  {formatTimestamp(chat.lastMessage.timestamp)}
-                                </span>
-                              )}
+                              <div className="flex items-center justify-between mt-1">
+                                <p className="text-sm text-zinc-300 truncate group-hover:text-zinc-200 transition-colors duration-300">
+                                  {truncatedMessageText}
+                                </p>
+                                {chat.unreadCount > 0 && (
+                                  <Badge className="ml-2 bg-yellow-500 text-black hover:bg-yellow-400 shadow-md shadow-yellow-500/30">
+                                    {chat.unreadCount}
+                                  </Badge>
+                                )}
+                              </div>
                             </div>
-                            <div className="flex items-center justify-between mt-1">
-                              <p className="text-sm text-zinc-300 truncate group-hover:text-zinc-200 transition-colors duration-300">
-                                {chat.lastMessage?.text ||
-                                  "Start a new conversation"}
-                              </p>
-                              {chat.unreadCount > 0 && (
-                                <Badge className="ml-2 bg-yellow-500 text-black hover:bg-yellow-400 shadow-md shadow-yellow-500/30">
-                                  {chat.unreadCount}
-                                </Badge>
-                              )}
-                            </div>
-                          </div>
 
-                          <DropdownMenu>
-                            <DropdownMenuTrigger
-                              asChild
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              <button className="p-2 text-zinc-400 hover:text-yellow-400 transition-colors duration-300">
-                                <MoreVertical className="w-6 h-6" />
-                              </button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent
-                              align="end"
-                              className="bg-zinc-900/95 border border-yellow-500/30 text-white rounded-tl-2xl rounded-br-2xl shadow-lg shadow-zinc-800/50 backdrop-blur-sm"
-                            >
-                              <DropdownMenuItem
-                                className="text-red-400 flex items-center hover:bg-zinc-800/80 hover:text-red-300 cursor-pointer transition-colors duration-300"
-                                onClick={(e) => confirmDelete(chat.refid, e)}
+                            <DropdownMenu>
+                              <DropdownMenuTrigger
+                                asChild
+                                onClick={(e) => e.stopPropagation()}
                               >
-                                <Trash2 className="w-5 h-5 mr-2 animate-bounce" />
-                                Delete Chat
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </div>
-                      </TooltipTrigger>
-                      <TooltipContent className="bg-zinc-800/90 text-white border-yellow-500/30 rounded-tl-lg rounded-br-lg shadow-md">
-                        Chat with {chat.name}
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                ))}
+                                <button className="p-2 text-zinc-400 hover:text-yellow-400 transition-colors duration-300">
+                                  <MoreVertical className="w-6 h-6" />
+                                </button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent
+                                align="end"
+                                className="bg-zinc-900/95 border border-yellow-500/30 text-white rounded-tl-2xl rounded-br-2xl shadow-lg shadow-zinc-800/50 backdrop-blur-sm"
+                              >
+                                <DropdownMenuItem
+                                  className="text-red-400 flex items-center hover:bg-zinc-800/80 hover:text-red-300 cursor-pointer transition-colors duration-300"
+                                  onClick={(e) => confirmDelete(chat.refid, e)}
+                                >
+                                  <Trash2 className="w-5 h-5 mr-2 animate-bounce" />
+                                  Delete Chat
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent className="bg-zinc-800/90 text-white border-yellow-500/30 rounded-tl-lg rounded-br-lg shadow-md">
+                          Chat with {chat.name}
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  );
+                })}
               </div>
             ) : (
               <div className="p-10 text-center text-zinc-400 flex flex-col items-center">
