@@ -14,6 +14,7 @@ import {
 import Login from "./Login";
 import Home from "./components/Home";
 import usePresence from "./hooks/usePresence";
+import ErrorPage from "./components/Errors/ErrorPage";
 
 function AppContent() {
   const user = useAtomValue(globalState);
@@ -38,6 +39,7 @@ function AppContent() {
             <Route path="/home" element={<Home />} />
             <Route path="/home/:username" element={<Home />} />
           </Route>
+          <Route path="*" element={<ErrorPage />} />
         </Routes>
       </Router>
     </>
