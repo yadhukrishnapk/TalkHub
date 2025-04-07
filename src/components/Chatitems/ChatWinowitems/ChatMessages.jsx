@@ -10,7 +10,7 @@ const TypingIndicator = React.memo(() => (
       <div className="flex space-x-1">
         <div className="h-2 w-2 bg-yellow-400 rounded-full animate-bounce [animation-delay:0ms]"></div>
         <div className="h-2 w-2 bg-yellow-400 rounded-full animate-bounce [animation-delay:300ms]"></div>
-        <div className="h-2 w-2 bg-yellow-400 entfernt rounded-full animate-bounce [animation-delay:600ms]"></div>
+        <div className="h-2 w-2 bg-yellow-400 rounded-full animate-bounce [animation-delay:600ms]"></div>
       </div>
     </div>
   </div>
@@ -36,7 +36,7 @@ const Message = React.memo(
         data-message-id={msg.id}
       >
         {msg.replyTo && (
-          <div className="max-w-[70%] mb-1 p-2 bg-gray-700/50 rounded-md text-sm text-gray-300">
+          <div className="max-w-[70%] mb-1 p-2 bg-gray-700/50 rounded-md text-sm text-gray-300 break-words">
             <span className="block font-semibold text-yellow-400">
               {msg.replyTo.sender === user.uid ? "You" : "Them"}:
             </span>
@@ -44,11 +44,11 @@ const Message = React.memo(
           </div>
         )}
         <div
-          className={`p-3 max-w-[70%] shadow-md ${
+          className={`p-3 max-w-[50%] shadow-md ${
             isUserMessage
               ? "bg-yellow-400 text-black font-medium rounded-tr-3xl rounded-bl-3xl rounded-tl-md rounded-br-md"
               : "bg-gray-800 text-white rounded-tl-3xl rounded-br-3xl rounded-tr-md rounded-bl-md"
-          }`}
+          } break-words whitespace-pre-wrap`}
         >
           {msg.text}
         </div>
