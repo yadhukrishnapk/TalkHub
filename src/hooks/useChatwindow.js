@@ -23,18 +23,16 @@ const useChatWindow = (initialUsername) => {
   const observerRef = useRef(null);
   const [isOpponentOnline, setIsOpponentOnline] = useState(false);
   const [lastOnline, setLastOnline] = useState(null);
-  const [isOpponentTyping, setIsOpponentTyping] = useState(false); // New state for opponent's typing
+  const [isOpponentTyping, setIsOpponentTyping] = useState(false); 
   const hasMarkedRead = useRef(false);
   const [replyingTo, setReplyingTo] = useState(null);
-  const typingTimeoutRef = useRef(null); // To debounce typing updates
+  const typingTimeoutRef = useRef(null); 
 
-  // Fetch chat ID
   useEffect(() => {
     if (!initialUsername || !user) return;
     fetchChatId(db, user, initialUsername, setActiveChat);
   }, [initialUsername, user]);
 
-  // Monitor opponent's online status
   useEffect(() => {
     if (!initialUsername || !user) return;
     const lowercaseUsername = initialUsername.toLowerCase();
