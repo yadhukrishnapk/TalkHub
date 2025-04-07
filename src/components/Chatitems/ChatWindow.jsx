@@ -54,7 +54,7 @@ function ChatWindow({ initialUsername }) {
           lastOnline={lastOnline}
           isOpponentTyping={isOpponentTyping} // Pass to ChatHeader
         />
-        <CardContent className="flex flex-col flex-1 p-0 overflow-hidden">
+        <CardContent className="flex flex-col flex-1 p-0 -mb-6 overflow-hidden">
           <ChatMessages
             scrollAreaRef={scrollAreaRef}
             isLoading={false}
