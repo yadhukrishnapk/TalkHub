@@ -6,6 +6,7 @@ import { chatdetails, globalState } from "../../jotai/globalState";
 import { doc, getDoc } from "firebase/firestore";
 import { db, realtimeDb } from "../../firebase";
 import { ref, onValue, off } from "firebase/database";
+import UserInfoShimmer from "../ui/Shimmers/UserInfoShimmer";
 
 const UserInfoPanel = ({ selectedUsername }) => {
   const currentUser = useAtomValue(globalState);
@@ -84,13 +85,7 @@ const UserInfoPanel = ({ selectedUsername }) => {
   }
 
   if (loading) {
-    return (
-      <div className="bg-[#121212] text-white h-full flex items-center justify-center">
-        <div className="animate-pulse text-yellow-400 font-medium">
-          Loading user information...
-        </div>
-      </div>
-    );
+    return <UserInfoShimmer/>
   }
 
   return (
