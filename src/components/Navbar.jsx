@@ -54,6 +54,11 @@ function Navbar() {
   const closePremiumModal = () => {
     setIsPremiumModalOpen(false);
   };
+
+  const handleSettingsClick = () => {
+    navigate("/settings"); // Navigate to settings page
+  };
+
   console.log("user loged", user);
 
   return (
@@ -134,6 +139,12 @@ function Navbar() {
                           >
                             <Star className="h-4 w-4 mr-2" /> UPGRADE TO PREMIUM
                           </Button>
+                          <Button
+                           className={`w-full mt-2 bg-zinc-800 hover:bg-zinc-700 text-white font-bold`}
+                            onClick={handleSettingsClick} // Navigate to settings
+                          ><Settings className="mr-2 h-4 w-4 text-zinc-400" />
+                            Settings
+                          </Button>  
                         </div>
                       </div>
                     )}
@@ -206,7 +217,10 @@ function Navbar() {
                       </div>
                     </div>
 
-                    <DropdownMenuItem className="focus:bg-zinc-800 cursor-pointer px-3 py-2 rounded-lg hover:bg-zinc-800">
+                    <DropdownMenuItem
+                      onClick={handleSettingsClick} // Navigate to settings
+                      className="focus:bg-zinc-800 cursor-pointer px-3 py-2 rounded-lg hover:bg-zinc-800"
+                    >
                       <Settings className="mr-2 h-4 w-4 text-zinc-400" />
                       Account Settings
                     </DropdownMenuItem>
