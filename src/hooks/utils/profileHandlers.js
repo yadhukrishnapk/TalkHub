@@ -7,6 +7,17 @@ import { useEffect } from "react";
 export const handleImageUpload = async (event, setLoading, setUser) => {
   const file = event.target.files[0];
   if (!file) return;
+  console.log("File selected:", file);
+  console.log("Cloudinary upload preset:", import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET);
+  console.log("Cloudinary cloud name:", import.meta.env.VITE_CLOUDINARY_CLOUD_NAME);
+  console.log("Cloudinary upload URL:", `https://api.cloudinary.com/v1_1/${import.meta.env.VITE_CLOUDINARY_CLOUD_NAME}/image/upload`);
+  console.log("Cloudinary upload form data:", {
+    file,
+    upload_preset: import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET,
+    cloud_name: import.meta.env.VITE_CLOUDINARY_CLOUD_NAME,
+  });
+  
+  
 
   setLoading(true);
   const formData = new FormData();
