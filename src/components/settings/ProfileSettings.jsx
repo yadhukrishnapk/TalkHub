@@ -4,16 +4,18 @@ import { globalState } from "../../jotai/globalState";
 import { useNavigate } from "react-router-dom";
 import { Button } from "../ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "../ui/avatar";
-import { User, ArrowLeft, Camera, X } from "lucide-react";
+import { User, ArrowLeft, Camera, X, Check, Circle, Square } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Dialog, DialogContent, DialogTrigger } from "../ui/dialog";
+import Cropper from "react-easy-crop";
 import {
   handleImageUpload,
   handleAvatarMouseMove,
   handlePreviewMouseMove,
   useAvatarZoomEffect,
   usePreviewZoomEffect,
-  useZoomBoxSizeEffect
+  useZoomBoxSizeEffect,
+  getCroppedImg
 } from "../../hooks/utils/profileHandlers";
 
 function ProfileSettings() {
@@ -37,18 +39,61 @@ function ProfileSettings() {
   const previewZoomRef = useRef(null);
   const [zoomBoxSize, setZoomBoxSize] = useState({ width: 80, height: 80 });
 
+  // Image cropping states
+  const [isCropperOpen, setIsCropperOpen] = useState(false);
+  const [imageSrc, setImageSrc] = useState(null);
+  const [crop, setCrop] = useState({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(1);
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
+  const [cropShape, setCropShape] = useState("rect"); // Default to rectangular crop
+
   const handleBack = () => {
     navigate("/home");
   };
 
-  // Use the imported handler functions
-  const onImageUpload = async (event) => {
-    try {
-      await handleImageUpload(event, setLoading, setUser);
-      fileInputRef.current.value = "";
-    } catch (error) {
-      // Handle error if needed
+  // Handle file selection
+  const onFileSelected = (event) => {
+    if (event.target.files && event.target.files.length > 0) {
+      const reader = new FileReader();
+      reader.addEventListener("load", () => {
+        setImageSrc(reader.result);
+        setIsCropperOpen(true);
+      });
+      reader.readAsDataURL(event.target.files[0]);
     }
+  };
+
+  // Handle cropping completion
+  const onCropComplete = (croppedArea, croppedAreaPixels) => {
+    setCroppedAreaPixels(croppedAreaPixels);
+  };
+
+  // Handle crop confirmation
+  const handleCropConfirm = async () => {
+    try {
+      setLoading(true);
+      const croppedImage = await getCroppedImg(imageSrc, croppedAreaPixels, cropShape);
+      await handleImageUpload(croppedImage, setLoading, setUser);
+      setIsCropperOpen(false);
+      setImageSrc(null);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    } catch (error) {
+      console.error("Error processing cropped image:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Handle crop cancellation
+  const handleCropCancel = () => {
+    setIsCropperOpen(false);
+    setImageSrc(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  // Toggle crop shape
+  const toggleCropShape = () => {
+    setCropShape(prevShape => prevShape === "rect" ? "round" : "rect");
   };
 
   const onAvatarMouseMove = (e) => {
@@ -182,8 +227,6 @@ function ProfileSettings() {
                           />
                         </div>
                       )}
-                      
-
                     </div>
                   ) : (
                     <div className="text-gray-500 text-center">
@@ -203,7 +246,7 @@ function ProfileSettings() {
                 <input
                   type="file"
                   ref={fileInputRef}
-                  onChange={onImageUpload}
+                  onChange={onFileSelected}
                   accept="image/*"
                   className="hidden"
                 />
@@ -242,6 +285,96 @@ function ProfileSettings() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Image Cropper Dialog */}
+      <Dialog open={isCropperOpen} onOpenChange={setIsCropperOpen}>
+        <DialogContent className="bg-zinc-900 border-zinc-800 max-w-md p-0 overflow-hidden">
+          <div className="p-4 border-b border-zinc-800">
+            <h2 className="text-xl font-bold text-yellow-400">Crop Your Image</h2>
+            <p className="text-zinc-400 text-sm">Adjust the crop area to set your profile picture</p>
+          </div>
+          
+          <div className="relative h-96 bg-black">
+            {imageSrc && (
+              <Cropper
+                image={imageSrc}
+                crop={crop}
+                zoom={zoom}
+                aspect={1}
+                onCropChange={setCrop}
+                onCropComplete={onCropComplete}
+                onZoomChange={setZoom}
+                cropShape={cropShape}
+                showGrid={true}
+                className="h-full"
+              />
+            )}
+          </div>
+          
+          <div className="p-4 space-y-4">
+            <div className="flex items-center">
+              <span className="text-zinc-400 mr-2 text-sm">Zoom:</span>
+              <input
+                type="range"
+                value={zoom}
+                min={1}
+                max={3}
+                step={0.1}
+                onChange={(e) => setZoom(parseFloat(e.target.value))}
+                className="flex-1 h-2 bg-zinc-700 rounded-lg appearance-none cursor-pointer"
+              />
+            </div>
+            
+            {/* Crop Shape Toggle */}
+            <div className="flex items-center justify-between">
+              <span className="text-zinc-400 text-sm">Crop Shape:</span>
+              <div className="flex space-x-2">
+                <Button
+                  variant={cropShape === "rect" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setCropShape("rect")}
+                  className={cropShape === "rect" 
+                    ? "bg-yellow-500 text-black" 
+                    : "border-zinc-700 text-zinc-300 hover:bg-zinc-800"}
+                >
+                  <Square className="h-4 w-4 mr-1" />
+                  Square
+                </Button>
+                <Button
+                  variant={cropShape === "round" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setCropShape("round")}
+                  className={cropShape === "round" 
+                    ? "bg-yellow-500 text-black" 
+                    : "border-zinc-700 text-zinc-300 hover:bg-zinc-800"}
+                >
+                  <Circle className="h-4 w-4 mr-1" />
+                  Circle
+                </Button>
+              </div>
+            </div>
+            
+            <div className="flex space-x-2 justify-end">
+              <Button 
+                variant="outline" 
+                onClick={handleCropCancel}
+                className="border-zinc-700 text-zinc-300 hover:bg-zinc-800"
+              >
+                <X className="h-4 w-4 mr-1" />
+                Cancel
+              </Button>
+              <Button 
+                onClick={handleCropConfirm}
+                className="bg-yellow-500 hover:bg-yellow-400 text-black font-bold"
+                disabled={loading}
+              >
+                <Check className="h-4 w-4 mr-1" />
+                Done
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

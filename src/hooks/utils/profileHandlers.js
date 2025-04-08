@@ -3,25 +3,69 @@ import { updateProfile } from "firebase/auth";
 import { auth } from "../../firebase";
 import { useEffect } from "react";
 
-// Handle image upload to Cloudinary and profile update
-export const handleImageUpload = async (event, setLoading, setUser) => {
-  const file = event.target.files[0];
-  if (!file) return;
-  console.log("File selected:", file);
-  console.log("Cloudinary upload preset:", import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET);
-  console.log("Cloudinary cloud name:", import.meta.env.VITE_CLOUDINARY_CLOUD_NAME);
-  console.log("Cloudinary upload URL:", `https://api.cloudinary.com/v1_1/${import.meta.env.VITE_CLOUDINARY_CLOUD_NAME}/image/upload`);
-  console.log("Cloudinary upload form data:", {
-    file,
-    upload_preset: import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET,
-    cloud_name: import.meta.env.VITE_CLOUDINARY_CLOUD_NAME,
+// Enhanced crop image function with shape support
+export const getCroppedImg = async (src, pixelCrop, cropShape = "rect") => {
+  return new Promise((resolve, reject) => {
+    const image = new Image();
+    image.src = src;
+    image.onload = () => {
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+      
+      // Set canvas dimensions to the cropped size
+      canvas.width = pixelCrop.width;
+      canvas.height = pixelCrop.height;
+      
+      // Clear the canvas
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      // If circle shape, create a circular clip path
+      if (cropShape === "circle") {
+        ctx.beginPath();
+        const radius = Math.min(pixelCrop.width, pixelCrop.height) / 2;
+        ctx.arc(
+          pixelCrop.width / 2,
+          pixelCrop.height / 2,
+          radius,
+          0,
+          2 * Math.PI
+        );
+        ctx.clip();
+      }
+      
+      // Draw the cropped image onto the canvas
+      ctx.drawImage(
+        image,
+        pixelCrop.x,
+        pixelCrop.y,
+        pixelCrop.width,
+        pixelCrop.height,
+        0,
+        0,
+        pixelCrop.width,
+        pixelCrop.height
+      );
+      
+      // Convert canvas to blob
+      canvas.toBlob((blob) => {
+        if (!blob) {
+          reject(new Error('Canvas is empty'));
+          return;
+        }
+        resolve(blob);
+      }, 'image/jpeg', 0.95);
+    };
+    image.onerror = (error) => reject(error);
   });
-  
-  
+};
 
+// Handle image upload to Cloudinary and profile update
+export const handleImageUpload = async (croppedImageBlob, setLoading, setUser) => {
+  if (!croppedImageBlob) return;
+  
   setLoading(true);
   const formData = new FormData();
-  formData.append("file", file);
+  formData.append("file", croppedImageBlob);
   formData.append("upload_preset", import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET);
   formData.append("cloud_name", import.meta.env.VITE_CLOUDINARY_CLOUD_NAME);
 
@@ -129,4 +173,10 @@ export const useZoomBoxSizeEffect = (isPreviewOpen, isPreviewHovering, previewIm
       });
     }
   }, [isPreviewOpen, isPreviewHovering]);
+};
+
+// Calculate aspect ratio based on dimensions
+export const calculateAspectRatio = (width, height) => {
+  if (!width || !height) return 1; // Default to square
+  return width / height;
 };
