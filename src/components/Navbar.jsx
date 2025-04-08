@@ -65,7 +65,7 @@ function Navbar() {
             <div className="flex items-center gap-2">
               <div className="relative w-8 h-8 flex items-center justify-center hover:rotate-45">
                 <div className="absolute inset-0 bg-yellow-400 rounded-lg transform rotate-45"></div>
-                <span className="relative font-bold text-black z-10">TH</span>
+                <span className="relative font-bold text-black z-10">TP</span>
               </div>
               <span className="font-bold text-2xl md:text-3xl">
                 <span className="text-white">Talk</span>
@@ -73,7 +73,7 @@ function Navbar() {
                   className="text-yellow-400"
                   style={{ animation: "pulse 5s ease-in-out infinite" }}
                 >
-                  Hub
+                  Place
                 </span>{" "}
               </span>
             </div>

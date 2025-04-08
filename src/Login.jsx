@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   signInWithPopup,
   GoogleAuthProvider,
@@ -12,7 +12,7 @@ import { useAtomValue, useSetAtom } from "jotai";
 import { globalState } from "./jotai/globalState";
 import { Navigate } from "react-router-dom";
 import Aurora from "./components/ui/Aurora";
-import PremiumModal from "./components/ui/preminumModal/PremiumModal"; // Import the PremiumModal component
+import PremiumModal from "./components/ui/preminumModal/PremiumModal";
 
 const Login = () => {
   const [error, setError] = useState("");
@@ -21,6 +21,23 @@ const Login = () => {
   const setUser = useSetAtom(globalState);
   const user = useAtomValue(globalState);
   const [isPremiumModalOpen, setIsPremiumModalOpen] = useState(false);
+  const [isRotating, setIsRotating] = useState(false);
+  const [displayText, setDisplayText] = useState('Hub');
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      rotateText();
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  function rotateText() {
+    setIsRotating(true);
+    setTimeout(() => {
+      setDisplayText('Place');
+      setIsRotating(false);
+    }, 500);
+  }
 
   const openPremiumModal = () => {
     setIsPremiumModalOpen(true);
@@ -105,8 +122,13 @@ const Login = () => {
           <span className="bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-300">
             Talk
           </span>
-          <span className="bg-clip-text text-transparent bg-gradient-to-r from-yellow-400 to-yellow-600 animate-pulse">
-            Hub
+          <span 
+            className={`
+              bg-clip-text text-transparent bg-gradient-to-r from-yellow-400 to-yellow-600
+              ${isRotating ? 'animate-[wiggle_500ms_ease-in-out]' : 'animate-pulse'}
+            `}
+          >
+            {displayText}
           </span>
         </h1>
         <p className="text-gray-300 text-center mt-3 sm:mt-4 text-lg sm:text-xl font-medium drop-shadow-md">
@@ -160,7 +182,6 @@ const Login = () => {
             </span>
           </button>
 
-          {/* Premium Teaser - Now clickable to open modal */}
           <div
             className="bg-zinc-800/90 p-4 sm:p-5 rounded-tl-xl sm:rounded-tl-2xl rounded-br-xl sm:rounded-br-2xl w-full border border-yellow-500/30 transition-all duration-300 hover:bg-zinc-800 hover:shadow-md sm:hover:shadow-lg hover:shadow-yellow-500/40 group backdrop-blur-sm cursor-pointer"
             onClick={openPremiumModal}
@@ -169,7 +190,7 @@ const Login = () => {
               <span className="mr-2 text-yellow-300 group-hover:animate-spin">
                 ✨
               </span>{" "}
-              TalkHub Premium
+              TalkPlace Premium
             </p>
             <p className="text-gray-200 text-xs sm:text-sm leading-relaxed drop-shadow-sm">
               Unlock exclusive chat rooms and advanced features!
