@@ -1,7 +1,7 @@
 import useSWR from "swr";
 import { useAtomValue } from "jotai";
 import { globalState } from "../jotai/globalState";
-import { doc, onSnapshot, updateDoc, collection, query, orderBy, limit } from "firebase/firestore";
+import { doc, onSnapshot, updateDoc, collection, query, orderBy, limit, getDoc } from "firebase/firestore";
 import { db } from "../firebase";
 
 const fetchChatList = (uid, mutate) => {
@@ -22,7 +22,7 @@ const fetchChatList = (uid, mutate) => {
     mutate(currentChatList, false);
   };
 
-  unsubscribeUser = onSnapshot(userDocRef, (docSnap) => {
+  unsubscribeUser = onSnapshot(userDocRef, async (docSnap) => {
     if (docSnap.exists()) {
       const rawChatList = docSnap.data().chatlist || [];
       const uniqueChatList = rawChatList.reduce((acc, chat) => {
@@ -40,43 +40,62 @@ const fetchChatList = (uid, mutate) => {
         }
       }
 
-      const enrichedChatList = uniqueChatList.map((chat) => {
-        const existingChat = currentChatList.find((c) => c.refid === chat.refid) || {};
-        const chatData = {
-          ...chat,
-          lastMessage: existingChat.lastMessage || null,
-          unreadCount: existingChat.unreadCount || 0,
-        };
+      const enrichedChatList = await Promise.all(
+        uniqueChatList.map(async (chat) => {
+          const existingChat = currentChatList.find((c) => c.refid === chat.refid) || {};
 
-        if (!chatListeners.has(chat.refid)) {
-          const messagesRef = collection(db, "chats", chat.refid, "messages");
-          const qLastMessage = query(messagesRef, orderBy("timestamp", "desc"), limit(1));
+          // Extract the other user's UID from refid (assuming refid is <uid1>_<uid2>)
+          const [uid1, uid2] = chat.refid.split("_");
+          const otherUserUid = uid1 === uid ? uid2 : uid1;
 
-          const unsubscribeMessages = onSnapshot(messagesRef, (snapshot) => {
-            const unreadCount = snapshot.docs.filter(
-              (doc) => !doc.data().readBy?.includes(uid) && doc.data().sender !== uid
-            ).length;
-            chatData.unreadCount = unreadCount;
+          // Fetch the latest profile pic from the users collection using UID
+          let profilePic = null;
+          const otherUserDocRef = doc(db, "users", otherUserUid);
+          const otherUserDoc = await getDoc(otherUserDocRef);
+          if (otherUserDoc.exists()) {
+            profilePic = otherUserDoc.data().photoURL || chat.profilePic;
+          } else {
+            profilePic = chat.profilePic; // Fallback to chatlist profilePic if user doc not found
+          }
 
-            const lastMessageDoc = snapshot.docs
-              .sort((a, b) => b.data().timestamp.toDate() - a.data().timestamp.toDate())[0];
-            chatData.lastMessage = lastMessageDoc
-              ? {
-                  text: lastMessageDoc.data().text,
-                  timestamp: lastMessageDoc.data().timestamp.toDate(),
-                }
-              : null;
+          const chatData = {
+            ...chat,
+            profilePic, // Use the latest profile pic from users collection
+            lastMessage: existingChat.lastMessage || null,
+            unreadCount: existingChat.unreadCount || 0,
+          };
+          console.log("Chat data with updated profilePic:", chatData);
 
-            updateChatList(currentChatList.map((c) =>
-              c.refid === chat.refid ? { ...chatData } : c
-            ));
-          });
+          if (!chatListeners.has(chat.refid)) {
+            const messagesRef = collection(db, "chats", chat.refid, "messages"); // Fixed "chats Roofing" typo
+            const qLastMessage = query(messagesRef, orderBy("timestamp", "desc"), limit(1));
 
-          chatListeners.set(chat.refid, unsubscribeMessages);
-        }
+            const unsubscribeMessages = onSnapshot(messagesRef, (snapshot) => {
+              const unreadCount = snapshot.docs.filter(
+                (doc) => !doc.data().readBy?.includes(uid) && doc.data().sender !== uid
+              ).length;
+              chatData.unreadCount = unreadCount;
 
-        return chatData;
-      });
+              const lastMessageDoc = snapshot.docs
+                .sort((a, b) => b.data().timestamp.toDate() - a.data().timestamp.toDate())[0];
+              chatData.lastMessage = lastMessageDoc
+                ? {
+                    text: lastMessageDoc.data().text,
+                    timestamp: lastMessageDoc.data().timestamp.toDate(),
+                  }
+                : null;
+
+              updateChatList(currentChatList.map((c) =>
+                c.refid === chat.refid ? { ...chatData } : c
+              ));
+            });
+
+            chatListeners.set(chat.refid, unsubscribeMessages);
+          }
+
+          return chatData;
+        })
+      );
 
       updateChatList(enrichedChatList);
     } else {

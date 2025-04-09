@@ -1,6 +1,7 @@
 import axios from "axios";
 import { updateProfile } from "firebase/auth";
-import { auth } from "../../firebase";
+import { doc, setDoc } from "firebase/firestore";
+import { auth, db } from "../../firebase";
 import { useEffect } from "react";
 
 // Enhanced crop image function with shape support
@@ -62,7 +63,7 @@ export const getCroppedImg = async (src, pixelCrop, cropShape = "rect") => {
 // Handle image upload to Cloudinary and profile update
 export const handleImageUpload = async (croppedImageBlob, setLoading, setUser) => {
   if (!croppedImageBlob) return;
-  
+
   setLoading(true);
   const formData = new FormData();
   formData.append("file", croppedImageBlob);
@@ -70,16 +71,33 @@ export const handleImageUpload = async (croppedImageBlob, setLoading, setUser) =
   formData.append("cloud_name", import.meta.env.VITE_CLOUDINARY_CLOUD_NAME);
 
   try {
+    // Upload image to Cloudinary
     const response = await axios.post(
       `https://api.cloudinary.com/v1_1/${import.meta.env.VITE_CLOUDINARY_CLOUD_NAME}/image/upload`,
       formData
     );
     const imageUrl = response.data.secure_url;
 
+    // Update Firebase Authentication profile
     await updateProfile(auth.currentUser, {
       photoURL: imageUrl,
     });
 
+    // Update Firestore user document
+    const userDocRef = doc(db, "users", auth.currentUser.uid);
+    await setDoc(
+      userDocRef,
+      {
+        photoURL: imageUrl,
+        displayName: auth.currentUser.displayName, // Preserve existing fields
+        email: auth.currentUser.email,
+        uid: auth.currentUser.uid,
+        updatedAt: new Date().toISOString(), // Optional: track update time
+      },
+      { merge: true } // Merge to avoid overwriting other fields
+    );
+
+    // Update local state
     setUser((prevUser) => ({
       ...prevUser,
       photoURL: imageUrl,
