@@ -36,6 +36,7 @@
     "react-dom": "^19.0.0",
     "react-easy-crop": "^5.4.1",
     "react-firebase-hooks": "^5.1.1",
+    "react-image-crop": "^11.0.7",
     "react-resizable-panels": "^2.1.7",
     "react-router-dom": "^7.4.0",
     "shadcn": "^2.4.0-canary.17",

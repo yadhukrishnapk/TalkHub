@@ -7,7 +7,8 @@ import { Avatar, AvatarImage, AvatarFallback } from "../ui/avatar";
 import { User, ArrowLeft, Camera, X, Check, Circle, Square } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Dialog, DialogContent, DialogTrigger } from "../ui/dialog";
-import Cropper from "react-easy-crop";
+import ReactCrop from 'react-image-crop';
+import 'react-image-crop/dist/ReactCrop.css';
 import {
   handleImageUpload,
   handleAvatarMouseMove,
@@ -42,10 +43,18 @@ function ProfileSettings() {
   // Image cropping states
   const [isCropperOpen, setIsCropperOpen] = useState(false);
   const [imageSrc, setImageSrc] = useState(null);
-  const [crop, setCrop] = useState({ x: 0, y: 0 });
-  const [zoom, setZoom] = useState(1);
-  const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
+  const [crop, setCrop] = useState({
+    unit: '%',
+    width: 50,
+    height: 50,
+    x: 25,
+    y: 25,
+    aspect: 1
+  });
+  const [completedCrop, setCompletedCrop] = useState(null);
+  const imgRef = useRef(null);
   const [cropShape, setCropShape] = useState("rect"); // Default to rectangular crop
+  const [scale, setScale] = useState(1);
 
   const handleBack = () => {
     navigate("/home");
@@ -63,16 +72,23 @@ function ProfileSettings() {
     }
   };
 
-  // Handle cropping completion
-  const onCropComplete = (croppedArea, croppedAreaPixels) => {
-    setCroppedAreaPixels(croppedAreaPixels);
+  // Handle image loaded in the crop component
+  const onImageLoad = (e) => {
+    imgRef.current = e.currentTarget;
   };
 
   // Handle crop confirmation
   const handleCropConfirm = async () => {
+    if (!completedCrop || !imgRef.current) return;
+    
     try {
       setLoading(true);
-      const croppedImage = await getCroppedImg(imageSrc, croppedAreaPixels, cropShape);
+      const croppedImage = await getCroppedImg(
+        imgRef.current,
+        completedCrop,
+        cropShape === "round" ? "circle" : "rect",
+        scale
+      );
       await handleImageUpload(croppedImage, setLoading, setUser);
       setIsCropperOpen(false);
       setImageSrc(null);
@@ -286,7 +302,7 @@ function ProfileSettings() {
         </Card>
       </div>
 
-      {/* Image Cropper Dialog */}
+      {/* Image Cropper Dialog using react-image-crop */}
       <Dialog open={isCropperOpen} onOpenChange={setIsCropperOpen}>
         <DialogContent className="bg-zinc-900 border-zinc-800 max-w-md p-0 overflow-hidden">
           <div className="p-4 border-b border-zinc-800">
@@ -294,20 +310,25 @@ function ProfileSettings() {
             <p className="text-zinc-400 text-sm">Adjust the crop area to set your profile picture</p>
           </div>
           
-          <div className="relative h-96 bg-black">
+          <div className="relative bg-black p-2">
             {imageSrc && (
-              <Cropper
-                image={imageSrc}
-                crop={crop}
-                zoom={zoom}
-                aspect={1}
-                onCropChange={setCrop}
-                onCropComplete={onCropComplete}
-                onZoomChange={setZoom}
-                cropShape={cropShape}
-                showGrid={true}
-                className="h-full"
-              />
+              <div className={cropShape === "round" ? "rounded-full overflow-hidden" : ""}>
+                <ReactCrop
+                  crop={crop}
+                  onChange={(c) => setCrop(c)}
+                  onComplete={(c) => setCompletedCrop(c)}
+                  aspect={1}
+                  circularCrop={cropShape === "round"}
+                  className={`max-h-96 mx-auto ${cropShape === "round" ? "rounded-full" : ""}`}
+                >
+                  <img
+                    src={imageSrc}
+                    alt="Crop preview"
+                    onLoad={onImageLoad}
+                    style={{ transform: `scale(${scale})` }}
+                  />
+                </ReactCrop>
+              </div>
             )}
           </div>
           
@@ -316,11 +337,11 @@ function ProfileSettings() {
               <span className="text-zinc-400 mr-2 text-sm">Zoom:</span>
               <input
                 type="range"
-                value={zoom}
-                min={1}
+                value={scale}
+                min={0.5}
                 max={3}
                 step={0.1}
-                onChange={(e) => setZoom(parseFloat(e.target.value))}
+                onChange={(e) => setScale(parseFloat(e.target.value))}
                 className="flex-1 h-2 bg-zinc-700 rounded-lg appearance-none cursor-pointer"
               />
             </div>

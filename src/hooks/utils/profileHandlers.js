@@ -4,29 +4,33 @@ import { doc, setDoc } from "firebase/firestore";
 import { auth, db } from "../../firebase";
 import { useEffect } from "react";
 
-// Enhanced crop image function with shape support
-export const getCroppedImg = async (src, pixelCrop, cropShape = "rect") => {
+export const getCroppedImg = async (image, crop, cropShape = "rect", scale = 1) => {
   return new Promise((resolve, reject) => {
-    const image = new Image();
-    image.src = src;
-    image.onload = () => {
+    try {
       const canvas = document.createElement("canvas");
       const ctx = canvas.getContext("2d");
       
-      // Set canvas dimensions to the cropped size
-      canvas.width = pixelCrop.width;
-      canvas.height = pixelCrop.height;
+      const scaleX = image.naturalWidth / image.width;
+      const scaleY = image.naturalHeight / image.height;
       
-      // Clear the canvas
+      const pixelRatio = window.devicePixelRatio || 1;
+      
+      const cropWidth = crop.width * scaleX;
+      const cropHeight = crop.height * scaleY;
+      
+      canvas.width = cropWidth * pixelRatio;
+      canvas.height = cropHeight * pixelRatio;
+      
+      ctx.scale(pixelRatio, pixelRatio);
+      
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       
-      // If circle shape, create a circular clip path
       if (cropShape === "circle") {
         ctx.beginPath();
-        const radius = Math.min(pixelCrop.width, pixelCrop.height) / 2;
+        const radius = Math.min(cropWidth, cropHeight) / 2;
         ctx.arc(
-          pixelCrop.width / 2,
-          pixelCrop.height / 2,
+          cropWidth / 2,
+          cropHeight / 2,
           radius,
           0,
           2 * Math.PI
@@ -34,17 +38,22 @@ export const getCroppedImg = async (src, pixelCrop, cropShape = "rect") => {
         ctx.clip();
       }
       
+      const sourceX = (crop.x * scaleX) / scale;
+      const sourceY = (crop.y * scaleY) / scale;
+      const sourceWidth = (cropWidth / scale);
+      const sourceHeight = (cropHeight / scale);
+      
       // Draw the cropped image onto the canvas
       ctx.drawImage(
         image,
-        pixelCrop.x,
-        pixelCrop.y,
-        pixelCrop.width,
-        pixelCrop.height,
+        sourceX,
+        sourceY,
+        sourceWidth,
+        sourceHeight,
         0,
         0,
-        pixelCrop.width,
-        pixelCrop.height
+        cropWidth,
+        cropHeight
       );
       
       // Convert canvas to blob
@@ -55,8 +64,9 @@ export const getCroppedImg = async (src, pixelCrop, cropShape = "rect") => {
         }
         resolve(blob);
       }, 'image/jpeg', 0.95);
-    };
-    image.onerror = (error) => reject(error);
+    } catch (error) {
+      reject(error);
+    }
   });
 };
 
