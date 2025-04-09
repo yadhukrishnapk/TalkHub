@@ -7,6 +7,7 @@ import { doc, getDoc } from "firebase/firestore";
 import { db, realtimeDb } from "../../firebase";
 import { ref, onValue, off } from "firebase/database";
 import UserInfoShimmer from "../ui/Shimmers/UserInfoShimmer";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog"; // Import Dialog components
 
 const UserInfoPanel = ({ selectedUsername }) => {
   const currentUser = useAtomValue(globalState);
@@ -16,7 +17,7 @@ const UserInfoPanel = ({ selectedUsername }) => {
   const [isOpponentOnline, setIsOpponentOnline] = useState(false);
   const [lastOnline, setLastOnline] = useState(null);
   const chatdet = useAtomValue(chatdetails);
-  // console.log("chatdet on info", chatdet);
+  const [isImagePopupOpen, setIsImagePopupOpen] = useState(false); // State for image popup
 
   useEffect(() => {
     const fetchUserInfo = async () => {
@@ -85,7 +86,7 @@ const UserInfoPanel = ({ selectedUsername }) => {
   }
 
   if (loading) {
-    return <UserInfoShimmer/>
+    return <UserInfoShimmer />;
   }
 
   return (
@@ -97,18 +98,33 @@ const UserInfoPanel = ({ selectedUsername }) => {
 
       {/* User Profile Section */}
       <div className="p-6 flex flex-col items-center border-b border-gray-800 relative z-10">
-        <div className="w-24 h-24 rounded-tl-3xl rounded-br-3xl bg-gray-800 flex items-center justify-center overflow-hidden shadow-lg shadow-yellow-400/30 group relative">
-          {chatdet.profilePic ? (
-            <img
-              src={chatdet.profilePic}
-              alt={chatdet.chatname}
-              className="w-24 h-24 object-cover transition-transform duration-300 group-hover:scale-110"
-            />
-          ) : (
-            <UserCircle2 className="w-12 h-12 text-yellow-400 animate-spin-slow" />
-          )}
-          <div className="absolute inset-0 bg-yellow-400 opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
-        </div>
+        <Dialog open={isImagePopupOpen} onOpenChange={setIsImagePopupOpen}>
+          <DialogTrigger asChild>
+            <div className="w-24 h-24 rounded-tl-3xl rounded-br-3xl bg-gray-800 flex items-center justify-center overflow-hidden shadow-lg shadow-yellow-400/30 group relative cursor-pointer">
+              {chatdet.profilePic ? (
+                <img
+                  src={chatdet.profilePic}
+                  alt={chatdet.chatname}
+                  className="w-24 h-24 object-cover transition-transform duration-300 group-hover:scale-110"
+                />
+              ) : (
+                <UserCircle2 className="w-12 h-12 text-yellow-400 animate-spin-slow" />
+              )}
+              <div className="absolute inset-0 bg-yellow-400 opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
+            </div>
+          </DialogTrigger>
+          <DialogContent className="p-0 border-none bg-black max-w-[90vw] max-h-[90vh] flex items-center justify-center">
+            {chatdet.profilePic ? (
+              <img
+                src={chatdet.profilePic}
+                alt={chatdet.chatname}
+                className="max-w-full max-h-[80vh] object-contain rounded-lg"
+              />
+            ) : (
+              <div className="text-gray-500 text-center">No image available</div>
+            )}
+          </DialogContent>
+        </Dialog>
         <h3 className="text-2xl font-bold mt-4 bg-clip-text text-transparent bg-gradient-to-r from-yellow-400 to-white">
           {chatdet.chatname || "Unknown User"}
         </h3>
