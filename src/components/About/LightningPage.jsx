@@ -8,7 +8,7 @@ const LightningPage = () => {
 
   return (
     <div>
-      <div style={{ width: "100%", height: "900px", position: "relative" }}>
+       <div style={{ width: "100%", height: "100vh", position: "relative" }}>
         <GridDistortion
           imageSrc="https://picsum.photos/1920/1080?grayscale"
           grid={10}
