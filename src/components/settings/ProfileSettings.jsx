@@ -4,11 +4,19 @@ import { globalState } from "../../jotai/globalState";
 import { useNavigate } from "react-router-dom";
 import { Button } from "../ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "../ui/avatar";
-import { User, ArrowLeft, Camera, X, Check, Circle, Square } from "lucide-react";
+import {
+  User,
+  ArrowLeft,
+  Camera,
+  X,
+  Check,
+  Circle,
+  Square,
+} from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Dialog, DialogContent, DialogTrigger } from "../ui/dialog";
-import ReactCrop from 'react-image-crop';
-import 'react-image-crop/dist/ReactCrop.css';
+import ReactCrop from "react-image-crop";
+import "react-image-crop/dist/ReactCrop.css";
 import {
   handleImageUpload,
   handleAvatarMouseMove,
@@ -16,7 +24,7 @@ import {
   useAvatarZoomEffect,
   usePreviewZoomEffect,
   useZoomBoxSizeEffect,
-  getCroppedImg
+  getCroppedImg,
 } from "../../hooks/utils/profileHandlers";
 
 function ProfileSettings() {
@@ -25,16 +33,22 @@ function ProfileSettings() {
   const fileInputRef = useRef(null);
   const [loading, setLoading] = useState(false);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
-  
+
   // States for avatar hover zoom
   const [isAvatarHovering, setIsAvatarHovering] = useState(false);
-  const [avatarMousePosition, setAvatarMousePosition] = useState({ x: 0, y: 0 });
+  const [avatarMousePosition, setAvatarMousePosition] = useState({
+    x: 0,
+    y: 0,
+  });
   const avatarRef = useRef(null);
   const avatarZoomRef = useRef(null);
-  
+
   // States for preview image hover zoom
   const [isPreviewHovering, setIsPreviewHovering] = useState(false);
-  const [previewMousePosition, setPreviewMousePosition] = useState({ x: 0, y: 0 });
+  const [previewMousePosition, setPreviewMousePosition] = useState({
+    x: 0,
+    y: 0,
+  });
   const [zoomBoxPosition, setZoomBoxPosition] = useState({ x: 0, y: 0 });
   const previewImageRef = useRef(null);
   const previewZoomRef = useRef(null);
@@ -44,12 +58,12 @@ function ProfileSettings() {
   const [isCropperOpen, setIsCropperOpen] = useState(false);
   const [imageSrc, setImageSrc] = useState(null);
   const [crop, setCrop] = useState({
-    unit: '%',
+    unit: "%",
     width: 50,
     height: 50,
     x: 25,
     y: 25,
-    aspect: 1
+    aspect: 1,
   });
   const [completedCrop, setCompletedCrop] = useState(null);
   const imgRef = useRef(null);
@@ -80,7 +94,7 @@ function ProfileSettings() {
   // Handle crop confirmation
   const handleCropConfirm = async () => {
     if (!completedCrop || !imgRef.current) return;
-    
+
     try {
       setLoading(true);
       const croppedImage = await getCroppedImg(
@@ -109,7 +123,7 @@ function ProfileSettings() {
 
   // Toggle crop shape
   const toggleCropShape = () => {
-    setCropShape(prevShape => prevShape === "rect" ? "round" : "rect");
+    setCropShape((prevShape) => (prevShape === "rect" ? "round" : "rect"));
   };
 
   const onAvatarMouseMove = (e) => {
@@ -118,10 +132,10 @@ function ProfileSettings() {
 
   const onPreviewMouseMove = (e) => {
     handlePreviewMouseMove(
-      e, 
-      previewImageRef, 
-      setPreviewMousePosition, 
-      setZoomBoxPosition, 
+      e,
+      previewImageRef,
+      setPreviewMousePosition,
+      setZoomBoxPosition,
       zoomBoxSize
     );
   };
@@ -129,7 +143,12 @@ function ProfileSettings() {
   // Use the imported effects
   useAvatarZoomEffect(isAvatarHovering, avatarMousePosition, avatarZoomRef);
   usePreviewZoomEffect(isPreviewHovering, previewMousePosition, previewZoomRef);
-  useZoomBoxSizeEffect(isPreviewOpen, isPreviewHovering, previewImageRef, setZoomBoxSize);
+  useZoomBoxSizeEffect(
+    isPreviewOpen,
+    isPreviewHovering,
+    previewImageRef,
+    setZoomBoxSize
+  );
 
   if (!user) {
     return (
@@ -167,31 +186,36 @@ function ProfileSettings() {
             <div className="flex justify-center relative">
               <Dialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
                 <DialogTrigger asChild>
-                  <div 
+                  <div
                     className="cursor-pointer relative"
                     ref={avatarRef}
-                    onMouseEnter={() => user.photoURL && setIsAvatarHovering(true)}
+                    onMouseEnter={() =>
+                      user.photoURL && setIsAvatarHovering(true)
+                    }
                     onMouseLeave={() => setIsAvatarHovering(false)}
                     onMouseMove={onAvatarMouseMove}
                   >
                     <Avatar className="h-36 w-36 ring-2 ring-yellow-500">
                       {user.photoURL ? (
-                        <AvatarImage src={user.photoURL} alt={user.displayName} />
+                        <AvatarImage
+                          src={user.photoURL}
+                          alt={user.displayName}
+                        />
                       ) : (
                         <AvatarFallback className="bg-zinc-700 text-white">
                           <User className="h-12 w-12" />
                         </AvatarFallback>
                       )}
                     </Avatar>
-                    
+
                     {isAvatarHovering && user.photoURL && (
                       <div className="absolute left-0 top-0 w-64 h-64 pointer-events-none z-50 rounded-lg overflow-hidden shadow-xl border-2 border-yellow-500 bg-black -translate-y-full translate-x-1/4">
-                        <div 
+                        <div
                           ref={avatarZoomRef}
                           className="w-full h-full bg-cover bg-no-repeat transform scale-200"
-                          style={{ 
+                          style={{
                             backgroundImage: `url(${user.photoURL})`,
-                            transformOrigin: `${avatarMousePosition.x}% ${avatarMousePosition.y}%`
+                            transformOrigin: `${avatarMousePosition.x}% ${avatarMousePosition.y}%`,
                           }}
                         />
                       </div>
@@ -200,7 +224,7 @@ function ProfileSettings() {
                 </DialogTrigger>
                 <DialogContent className="p-0 border-none bg-black max-w-[90vw] max-h-[90vh] flex items-center justify-center">
                   {user.photoURL ? (
-                    <div 
+                    <div
                       className="relative"
                       onMouseEnter={() => setIsPreviewHovering(true)}
                       onMouseLeave={() => setIsPreviewHovering(false)}
@@ -212,33 +236,37 @@ function ProfileSettings() {
                         alt="Full-size profile preview"
                         className="max-w-full max-h-[80vh] object-contain rounded-lg"
                       />
-                      
+
                       {isPreviewHovering && user.photoURL && (
-                        <div 
+                        <div
                           className="absolute pointer-events-none border-2 border-yellow-400 bg-yellow-400/20"
                           style={{
                             width: `${zoomBoxSize.width}px`,
                             height: `${zoomBoxSize.height}px`,
-                            left: `calc(${previewMousePosition.x}% - ${zoomBoxSize.width / 2}px)`,
-                            top: `calc(${previewMousePosition.y}% - ${zoomBoxSize.height / 2}px)`,
+                            left: `calc(${previewMousePosition.x}% - ${
+                              zoomBoxSize.width / 2
+                            }px)`,
+                            top: `calc(${previewMousePosition.y}% - ${
+                              zoomBoxSize.height / 2
+                            }px)`,
                           }}
                         />
                       )}
-                      
+
                       {isPreviewHovering && user.photoURL && (
-                        <div 
+                        <div
                           className="absolute pointer-events-none z-50 rounded-lg overflow-hidden shadow-xl border-2 border-yellow-500 bg-black w-80 h-80"
                           style={{
                             left: `${zoomBoxPosition.x}%`,
                             top: `${zoomBoxPosition.y}%`,
                           }}
                         >
-                          <div 
+                          <div
                             ref={previewZoomRef}
                             className="w-full h-full bg-cover bg-no-repeat transform scale-300"
-                            style={{ 
+                            style={{
                               backgroundImage: `url(${user.photoURL})`,
-                              transformOrigin: `${previewMousePosition.x}% ${previewMousePosition.y}%`
+                              transformOrigin: `${previewMousePosition.x}% ${previewMousePosition.y}%`,
                             }}
                           />
                         </div>
@@ -269,7 +297,9 @@ function ProfileSettings() {
               </Button>
             </div>
             {loading && (
-              <p className="text-center text-yellow-400 text-sm">Uploading...</p>
+              <p className="text-center text-yellow-400 text-sm">
+                Uploading...
+              </p>
             )}
 
             {/* User Details */}
@@ -306,20 +336,30 @@ function ProfileSettings() {
       <Dialog open={isCropperOpen} onOpenChange={setIsCropperOpen}>
         <DialogContent className="bg-zinc-900 border-zinc-800 max-w-md p-0 overflow-hidden">
           <div className="p-4 border-b border-zinc-800">
-            <h2 className="text-xl font-bold text-yellow-400">Crop Your Image</h2>
-            <p className="text-zinc-400 text-sm">Adjust the crop area to set your profile picture</p>
+            <h2 className="text-xl font-bold text-yellow-400">
+              Crop Your Image
+            </h2>
+            <p className="text-zinc-400 text-sm">
+              Adjust the crop area to set your profile picture
+            </p>
           </div>
-          
+
           <div className="relative bg-black p-2">
             {imageSrc && (
-              <div className={cropShape === "round" ? "rounded-full overflow-hidden" : ""}>
+              <div
+                className={
+                  cropShape === "round" ? "rounded-full overflow-hidden" : ""
+                }
+              >
                 <ReactCrop
                   crop={crop}
                   onChange={(c) => setCrop(c)}
                   onComplete={(c) => setCompletedCrop(c)}
                   aspect={1}
                   circularCrop={cropShape === "round"}
-                  className={`max-h-96 mx-auto ${cropShape === "round" ? "rounded-full" : ""}`}
+                  className={`max-h-96 mx-auto ${
+                    cropShape === "round" ? "rounded-full" : ""
+                  }`}
                 >
                   <img
                     src={imageSrc}
@@ -331,7 +371,7 @@ function ProfileSettings() {
               </div>
             )}
           </div>
-          
+
           <div className="p-4 space-y-4">
             <div className="flex items-center">
               <span className="text-zinc-400 mr-2 text-sm">Zoom:</span>
@@ -345,7 +385,7 @@ function ProfileSettings() {
                 className="flex-1 h-2 bg-zinc-700 rounded-lg appearance-none cursor-pointer"
               />
             </div>
-            
+
             {/* Crop Shape Toggle */}
             <div className="flex items-center justify-between">
               <span className="text-zinc-400 text-sm">Crop Shape:</span>
@@ -354,9 +394,11 @@ function ProfileSettings() {
                   variant={cropShape === "rect" ? "default" : "outline"}
                   size="sm"
                   onClick={() => setCropShape("rect")}
-                  className={cropShape === "rect" 
-                    ? "bg-yellow-500 text-black" 
-                    : "border-zinc-700 text-zinc-300 hover:bg-zinc-800"}
+                  className={
+                    cropShape === "rect"
+                      ? "bg-yellow-500 text-black"
+                      : "border-zinc-700 text-zinc-300 hover:bg-zinc-800"
+                  }
                 >
                   <Square className="h-4 w-4 mr-1" />
                   Square
@@ -365,32 +407,62 @@ function ProfileSettings() {
                   variant={cropShape === "round" ? "default" : "outline"}
                   size="sm"
                   onClick={() => setCropShape("round")}
-                  className={cropShape === "round" 
-                    ? "bg-yellow-500 text-black" 
-                    : "border-zinc-700 text-zinc-300 hover:bg-zinc-800"}
+                  className={
+                    cropShape === "round"
+                      ? "bg-yellow-500 text-black"
+                      : "border-zinc-700 text-zinc-300 hover:bg-zinc-800"
+                  }
                 >
                   <Circle className="h-4 w-4 mr-1" />
                   Circle
                 </Button>
               </div>
             </div>
-            
+
             <div className="flex space-x-2 justify-end">
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 onClick={handleCropCancel}
                 className="border-zinc-700 text-zinc-300 hover:bg-zinc-800"
               >
                 <X className="h-4 w-4 mr-1" />
                 Cancel
               </Button>
-              <Button 
+              <Button
                 onClick={handleCropConfirm}
-                className="bg-yellow-500 hover:bg-yellow-400 text-black font-bold"
+                className="bg-yellow-500 hover:bg-yellow-400 text-black font-bold flex items-center"
                 disabled={loading}
               >
-                <Check className="h-4 w-4 mr-1" />
-                Done
+                {loading ? (
+                  <>
+                    <svg
+                      className="animate-spin h-4 w-4 mr-2"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      />
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8v8h8a8 8 0 01-16 0z"
+                      />
+                    </svg>
+                    Adding...
+                  </>
+                ) : (
+                  <>
+                    <Check className="h-4 w-4 mr-1" />
+                    Done
+                  </>
+                )}
               </Button>
             </div>
           </div>
