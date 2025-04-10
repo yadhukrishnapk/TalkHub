@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Suspense, lazy } from "react";
 import { Provider } from "jotai";
 import { useAtomValue } from "jotai";
 import { globalState } from "./jotai/globalState";
@@ -11,11 +11,15 @@ import {
   Route,
   Navigate,
 } from "react-router-dom";
-import Login from "./Login";
-import Home from "./components/Home";
 import usePresence from "./hooks/usePresence";
-import ErrorPage from "./components/Errors/ErrorPage";
-import ProfileSettings from "./components/settings/ProfileSettings";
+import GlobalShimmer from "./components/ui/Shimmers/GlobalShimmer";
+
+// Lazy load components
+const Login = lazy(() => import("./Login"));
+const Home = lazy(() => import("./components/Home"));
+const ProfileSettings = lazy(() => import("./components/settings/ProfileSettings"));
+const LightningPage = lazy(() => import("./components/About/LightningPage"));
+const ErrorPage = lazy(() => import("./components/Errors/ErrorPage"));
 
 function AppContent() {
   const user = useAtomValue(globalState);
@@ -25,24 +29,27 @@ function AppContent() {
     <>
       <Toaster />
       <Router>
-        <Routes>
-          <Route
-            path="/"
-            element={user ? <Navigate to="/home" /> : <Login />}
-          />
-          <Route
-            element={
-              <ProtectedRoute>
-                <MainLayout />
-              </ProtectedRoute>
-            }
-          >
-            <Route path="/home" element={<Home />} />
-            <Route path="/home/:username" element={<Home />} />
-            <Route path="/settings" element={<ProfileSettings />} />
-          </Route>
-          <Route path="*" element={<ErrorPage />} />
-        </Routes>
+        <Suspense fallback={<div><GlobalShimmer/></div>}>
+          <Routes>
+            <Route
+              path="/"
+              element={user ? <Navigate to="/home" /> : <Login />}
+            />
+            <Route
+              element={
+                <ProtectedRoute>
+                  <MainLayout />
+                </ProtectedRoute>
+              }
+            >
+              <Route path="/home" element={<Home />} />
+              <Route path="/home/:username" element={<Home />} />
+              <Route path="/settings" element={<ProfileSettings />} />
+              <Route path="/potraits" element={<LightningPage />} />
+            </Route>
+            <Route path="*" element={<ErrorPage />} />
+          </Routes>
+        </Suspense>
       </Router>
     </>
   );

@@ -10,6 +10,7 @@ import {
   Settings,
   Star,
   MessageSquare,
+  Image,
 } from "lucide-react";
 import { Button } from "./ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "./ui/avatar";
@@ -22,7 +23,7 @@ import {
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTrigger } from "../components/ui/sheet";
-import {  useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom"; // Added Link import
 import { Badge } from "./ui/badge";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 import PremiumModal from "./ui/preminumModal/PremiumModal";
@@ -33,14 +34,14 @@ function Navbar() {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    if ('caches' in window) {
+    if ("caches" in window) {
       caches.keys().then((names) => {
         names.forEach((name) => {
           caches.delete(name);
         });
       });
     }
-    
+
     localStorage.clear();
     sessionStorage.clear();
     setUser(null);
@@ -56,7 +57,11 @@ function Navbar() {
   };
 
   const handleSettingsClick = () => {
-    navigate("/settings"); // Navigate to settings page
+    navigate("/settings");
+  };
+
+  const handleGrayscaleImagesClick = () => {
+    navigate("/potraits");
   };
 
   console.log("user loged", user);
@@ -68,10 +73,12 @@ function Navbar() {
           {/* Logo and Navigation */}
           <div className="flex items-center gap-6">
             <div className="flex items-center gap-2">
-              <div className="relative w-8 h-8 flex items-center justify-center hover:rotate-45">
-                <div className="absolute inset-0 bg-yellow-400 rounded-lg transform rotate-45"></div>
-                <span className="relative font-bold text-black z-10">TP</span>
-              </div>
+              <Link to="/home">
+                <div className="relative w-8 h-8 flex items-center justify-center hover:rotate-45">
+                  <div className="absolute inset-0 bg-yellow-400 rounded-lg transform rotate-45"></div>
+                  <span className="relative font-bold text-black z-10">TP</span>
+                </div>
+              </Link>
               <span className="font-bold text-2xl md:text-3xl">
                 <span className="text-white">Talk</span>
                 <span
@@ -140,11 +147,19 @@ function Navbar() {
                             <Star className="h-4 w-4 mr-2" /> UPGRADE TO PREMIUM
                           </Button>
                           <Button
-                           className={`w-full mt-2 bg-zinc-800 hover:bg-zinc-700 text-white font-bold`}
+                            className={`w-full mt-2 bg-zinc-800 hover:bg-zinc-700 text-white font-bold`}
                             onClick={handleSettingsClick} // Navigate to settings
-                          ><Settings className="mr-2 h-4 w-4 text-zinc-400" />
+                          >
+                            <Settings className="mr-2 h-4 w-4 text-zinc-400" />
                             Settings
-                          </Button>  
+                          </Button>
+                          <Button
+                            className="w-full bg-zinc-800 hover:bg-zinc-700 text-white font-bold py-1.5 mt-2"
+                            onClick={handleGrayscaleImagesClick}
+                          >
+                            <Image className="mr-2 h-4 w-4 text-zinc-400" />
+                            Potraits
+                          </Button>
                         </div>
                       </div>
                     )}
@@ -223,6 +238,13 @@ function Navbar() {
                     >
                       <Settings className="mr-2 h-4 w-4 text-zinc-400" />
                       Account Settings
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={handleGrayscaleImagesClick} // Navigate to grayscale images
+                      className="focus:bg-zinc-800 cursor-pointer px-3 py-2 rounded-lg hover:bg-zinc-800"
+                    >
+                      <Image className="mr-2 h-4 w-4 text-zinc-400" />
+                      Our Potratis
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       onClick={openPremiumModal}
