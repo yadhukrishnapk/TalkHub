@@ -1,13 +1,13 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { UserCircle2, FileText, Clock, Calendar, VideoOff } from "lucide-react";
+import { UserCircle2, FileText, Clock, Calendar, VideoOff, Maximize, Minimize, ZoomIn, ZoomOut } from "lucide-react";
 import { useAtomValue } from "jotai";
 import { chatdetails, globalState } from "../../jotai/globalState";
 import { doc, getDoc } from "firebase/firestore";
 import { db, realtimeDb } from "../../firebase";
 import { ref, onValue, off } from "firebase/database";
 import UserInfoShimmer from "../ui/Shimmers/UserInfoShimmer";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog"; // Import Dialog components
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 
 const UserInfoPanel = ({ selectedUsername }) => {
   const currentUser = useAtomValue(globalState);
@@ -17,7 +17,16 @@ const UserInfoPanel = ({ selectedUsername }) => {
   const [isOpponentOnline, setIsOpponentOnline] = useState(false);
   const [lastOnline, setLastOnline] = useState(null);
   const chatdet = useAtomValue(chatdetails);
-  const [isImagePopupOpen, setIsImagePopupOpen] = useState(false); // State for image popup
+  const [isImagePopupOpen, setIsImagePopupOpen] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const fullscreenImageRef = useRef(null);
+  const imageContainerRef = useRef(null);
+
+  const [scale, setScale] = useState(1);
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const [originalPosition, setOriginalPosition] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
     const fetchUserInfo = async () => {
@@ -58,11 +67,150 @@ const UserInfoPanel = ({ selectedUsername }) => {
     fetchUserInfo();
   }, [selectedUsername]);
 
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!isImagePopupOpen) {
+      resetZoom();
+    }
+  }, [isImagePopupOpen]);
+
+  const toggleFullscreen = () => {
+    if (!isFullscreen) {
+      if (fullscreenImageRef.current && fullscreenImageRef.current.requestFullscreen) {
+        fullscreenImageRef.current.requestFullscreen().catch(err => {
+          console.error(`Error attempting to enable fullscreen: ${err.message}`);
+        });
+      }
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen().catch(err => {
+          console.error(`Error attempting to exit fullscreen: ${err.message}`);
+        });
+      }
+    }
+  };
+
   const formatLastSeen = (timestamp) => {
     if (!timestamp) return "Unknown";
     const date = new Date(timestamp);
     return date.toLocaleString([], { hour: "2-digit", minute: "2-digit" });
   };
+const handleDoubleClick = (e) => {
+  if (!imageContainerRef.current) return;
+  
+  const rect = imageContainerRef.current.getBoundingClientRect();
+  
+  const x = e.clientX - rect.left;
+  const y = e.clientY - rect.top;
+
+  if (scale === 1) {
+    const offsetX = (x - rect.width / 2) * (2 - 1);
+    const offsetY = (y - rect.height / 2) * (2 - 1);
+    
+    setScale(2);
+    setPosition({ x: -offsetX, y: -offsetY });
+  } else {
+    resetZoom();
+  }
+};
+
+const resetZoom = () => {
+  setScale(1);
+  setPosition({ x: 0, y: 0 });
+  setIsDragging(false);
+};
+
+const handleMouseDown = (e) => {
+  if (scale > 1) {
+    setIsDragging(true);
+    setDragStart({ x: e.clientX, y: e.clientY });
+    setOriginalPosition({ ...position });
+    
+    e.preventDefault();
+  }
+};
+
+const handleMouseMove = (e) => {
+  if (isDragging && scale > 1) {
+    const dx = e.clientX - dragStart.x;
+    const dy = e.clientY - dragStart.y;
+    
+    setPosition({
+      x: originalPosition.x + dx,
+      y: originalPosition.y + dy
+    });
+        e.preventDefault();
+  }
+};
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+const zoomIn = () => {
+  if (scale < 4) {
+    const newScale = scale + 0.5;
+    
+    // When zooming in, maintain the center of the current view
+    const rect = imageContainerRef.current?.getBoundingClientRect();
+    if (rect) {
+      // Adjust position to keep the center point stable
+      const centerX = rect.width / 2;
+      const centerY = rect.height / 2;
+      
+      // Calculate how much the position needs to change to maintain center focus
+      const scaleFactor = (newScale / scale) - 1;
+      const adjustX = (centerX - position.x) * scaleFactor;
+      const adjustY = (centerY - position.y) * scaleFactor;
+      
+      setPosition({
+        x: position.x - adjustX,
+        y: position.y - adjustY
+      });
+    }
+    
+    setScale(newScale);
+  }
+};
+
+const zoomOut = () => {
+  if (scale > 1) {
+    const newScale = scale - 0.5;
+    
+    if (newScale === 1) {
+      // Reset to center if zooming all the way out
+      resetZoom();
+    } else {
+      const rect = imageContainerRef.current?.getBoundingClientRect();
+      if (rect) {
+        // Adjust position to keep the center point stable
+        const centerX = rect.width / 2;
+        const centerY = rect.height / 2;
+        
+        // Calculate how much the position needs to change to maintain center focus
+        const scaleFactor = 1 - (newScale / scale);
+        const adjustX = (centerX - position.x) * scaleFactor;
+        const adjustY = (centerY - position.y) * scaleFactor;
+        
+        setPosition({
+          x: position.x + adjustX,
+          y: position.y + adjustY
+        });
+        setScale(newScale);
+      }
+    }
+  }
+};
 
   if (!selectedUsername) {
     return (
@@ -113,13 +261,61 @@ const UserInfoPanel = ({ selectedUsername }) => {
               <div className="absolute inset-0 bg-yellow-400 opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
             </div>
           </DialogTrigger>
-          <DialogContent className="p-0 border-none bg-black max-w-[90vw] max-h-[90vh] flex items-center justify-center">
+          <DialogContent className="p-0 border-none bg-black max-w-[90vw] max-h-[90vh] flex flex-col items-center justify-center">
             {chatdet.profilePic ? (
-              <img
-                src={chatdet.profilePic}
-                alt={chatdet.chatname}
-                className="max-w-full max-h-[80vh] object-contain rounded-lg"
-              />
+              <div ref={fullscreenImageRef} className="relative w-full h-full flex items-center justify-center">
+                <div 
+                  ref={imageContainerRef}
+                  className="overflow-hidden relative w-full h-[80vh] flex items-center justify-center cursor-move"
+                  onDoubleClick={handleDoubleClick}
+                  onMouseDown={handleMouseDown}
+                  onMouseMove={handleMouseMove}
+                  onMouseUp={handleMouseUp}
+                  onMouseLeave={handleMouseUp}
+                >
+                  <img
+                    src={chatdet.profilePic}
+                    alt={chatdet.chatname}
+                    className="max-w-full max-h-full object-contain rounded-lg transition-transform duration-200"
+                    style={{
+                      transform: `scale(${scale}) translate(${position.x / scale}px, ${position.y / scale}px)`,
+                      transformOrigin: 'center'
+                    }}
+                    draggable="false"
+                  />
+                </div>
+                <div className="absolute bottom-3 right-3 flex space-x-2">
+                  <button 
+                    onClick={zoomOut}
+                    disabled={scale <= 1}
+                    className={`bg-black bg-opacity-60 p-2 rounded-full transition-all duration-200 text-white ${scale > 1 ? 'hover:bg-opacity-80 hover:shadow-md hover:shadow-yellow-400/20' : 'opacity-50 cursor-not-allowed'}`}
+                    aria-label="Zoom out"
+                  >
+                    <ZoomOut className="w-5 h-5" />
+                  </button>
+                  <button 
+                    onClick={zoomIn}
+                    disabled={scale >= 4}
+                    className={`bg-black bg-opacity-60 p-2 rounded-full transition-all duration-200 text-white ${scale < 4 ? 'hover:bg-opacity-80 hover:shadow-md hover:shadow-yellow-400/20' : 'opacity-50 cursor-not-allowed'}`}
+                    aria-label="Zoom in"
+                  >
+                    <ZoomIn className="w-5 h-5" />
+                  </button>
+                  <button 
+                    onClick={toggleFullscreen}
+                    className="bg-black bg-opacity-60 p-2 rounded-full hover:bg-opacity-80 transition-all duration-200 text-white hover:shadow-md hover:shadow-yellow-400/20"
+                    aria-label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
+                  >
+                    {isFullscreen ? 
+                      <Minimize className="w-5 h-5" /> : 
+                      <Maximize className="w-5 h-5" />
+                    }
+                  </button>
+                </div>
+                <div className="absolute bottom-3 left-3 bg-black bg-opacity-60 px-3 py-1 rounded-full text-xs text-white">
+                  {scale === 1 ? 'Double-click to zoom' : `${Math.round(scale * 100)}%`}
+                </div>
+              </div>
             ) : (
               <div className="text-gray-500 text-center">No image available</div>
             )}

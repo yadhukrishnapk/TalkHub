@@ -17,8 +17,8 @@ const MessageInput = ({
   handleEmojiClick,
   replyingTo,
   setReplyingTo,
-  chatdet, // Add chatdet prop
-  username, // Add username prop
+  chatdet,
+  username, 
 }) => {
   // Track typing activity
   useEffect(() => {
